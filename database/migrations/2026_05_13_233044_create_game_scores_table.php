@@ -1,0 +1,27 @@
+<?php
+
+use App\Models\GameRound;
+use App\Models\GameSession;
+use App\Models\GameTeam;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('game_scores', function (Blueprint $table) {
+            $table->id();
+            $table->foreignIdFor(GameSession::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(GameRound::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(GameTeam::class)->constrained()->cascadeOnDelete();
+            $table->integer('points')->default(0);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('game_scores');
+    }
+};
