@@ -8,190 +8,345 @@
     <title>Playard Curling | {{ $resource->name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    @vite(['resources/js/app.js'])
     <style>
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
         .cursor-hidden, .cursor-hidden * {
             cursor: none !important;
         }
 
-        @media (display-mode: fullscreen) {
-            .kiosk-only-hint {
-                display: none;
+        .thin-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .thin-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .thin-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+        }
+
+        .pulse-danger {
+            animation: pulse-danger 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 0 rgba(239, 68, 68, 0);
             }
+            50% {
+                transform: scale(1.06);
+                text-shadow: 0 0 30px rgba(239, 68, 68, 0.85);
+            }
+        }
+
+        .avatar-chip {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(250, 204, 21, 0.95));
+        }
+
+        .screen-saver-visible {
+            opacity: 1 !important;
+            pointer-events: auto !important;
         }
     </style>
 </head>
-<body class="min-h-screen bg-zinc-950 text-white kiosk-body">
-    <main class="mx-auto max-w-6xl px-5 py-6">
-        <header class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+<body class="h-screen bg-zinc-950 text-white kiosk-body">
+    <main class="flex h-screen max-h-screen flex-col overflow-hidden px-5 py-4">
+        <header class="mb-4 flex shrink-0 flex-row items-center justify-between gap-4">
             <div>
-                <div class="inline-flex rounded-xl bg-red-600 px-4 py-2 text-3xl font-black tracking-tight">PLAYARD</div>
-                <h1 class="mt-4 text-5xl font-black">{{ $resource->name }} Curling</h1>
-                <p class="mt-2 text-zinc-400">Enter your teams, start the timer, keep score and share your result.</p>
+                <div class="inline-flex rounded-xl bg-red-600 px-4 py-2 text-2xl font-black tracking-tight">PLAYARD</div>
+                <h1 class="mt-2 text-4xl font-black leading-none">{{ $resource->name }} Curling</h1>
+                <p class="mt-1 text-sm text-zinc-400">Enter teams, play, score, share.</p>
             </div>
-            <div></div>
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="openHowToPlayModal()" class="rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-center font-black hover:bg-white/20">
+                    How to Play
+                </button>
+                <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-right">
+                    <p class="text-xs font-black uppercase tracking-wider text-red-400">Lane screen</p>
+                    <p class="text-lg font-black">Customer mode</p>
+                    <p id="connectionIndicator" class="mt-1 text-xs font-black text-green-400">● Live</p>
+                </div>
+            </div>
         </header>
 
+        <div id="screenSaver" class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/95 opacity-0 transition-opacity duration-500">
+            <div class="text-center">
+                <div class="mx-auto inline-flex rounded-2xl bg-red-600 px-6 py-3 text-4xl font-black">PLAYARD</div>
+                <h2 class="mt-6 text-6xl font-black">Tap to continue</h2>
+                <p class="mt-3 text-xl text-zinc-400">Curling lane is still ready.</p>
+            </div>
+        </div>
+
+        <div id="howToPlayModal" class="pointer-events-none fixed inset-0 z-[70] flex items-center justify-center bg-black/85 px-6 opacity-0 transition-opacity duration-300">
+            <div class="thin-scrollbar max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] border border-white/10 bg-zinc-950 p-6 shadow-2xl">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-black uppercase tracking-wider text-red-400">Quick guide</p>
+                        <h2 class="mt-2 text-5xl font-black leading-none">How to Play Curling</h2>
+                        <p class="mt-2 text-zinc-400">Simple Playard rules. Read this, close it, then get sliding.</p>
+                    </div>
+                    <button type="button" onclick="closeHowToPlayModal()" class="rounded-2xl bg-white px-5 py-3 font-black text-black hover:bg-zinc-200">
+                        Close
+                    </button>
+                </div>
+
+                <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+                    <section class="rounded-3xl bg-white/5 p-5">
+                        <h3 class="text-2xl font-black">Basic rules</h3>
+                        <ol class="mt-4 space-y-3 text-lg text-zinc-200">
+                            <li><span class="font-black text-white">1.</span> Split into two teams: Red and Yellow.</li>
+                            <li><span class="font-black text-white">2.</span> Teams take turns sliding stones towards the target.</li>
+                            <li><span class="font-black text-white">3.</span> After all stones are played, check which team has the closest stone to the centre.</li>
+                            <li><span class="font-black text-white">4.</span> Only the team with the closest stone scores in that round.</li>
+                            <li><span class="font-black text-white">5.</span> Count how many of that team’s stones are closer than the other team’s closest stone.</li>
+                            <li><span class="font-black text-white">6.</span> The team with the highest score at the end wins.</li>
+                            <li><span class="font-black text-white">7.</span> If the score is level, play one final tiebreak round.</li>
+                        </ol>
+
+                        <div class="mt-5 rounded-3xl border border-red-500/30 bg-red-600/10 p-5">
+                            <h4 class="text-xl font-black">Simple scoring phrase</h4>
+                            <p class="mt-2 text-zinc-300">Closest stone decides who scores. Extra stones closer than the opponent’s best stone add extra points.</p>
+                        </div>
+                    </section>
+
+                    <section class="rounded-3xl bg-white p-5 text-black">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-black uppercase tracking-wider text-red-600">Scoring example</p>
+                                <h3 class="text-3xl font-black">Red scores 2</h3>
+                                <p class="mt-2 text-sm font-bold text-zinc-600">Red has two stones closer to the centre than Yellow’s best stone.</p>
+                            </div>
+                            <div class="rounded-2xl bg-red-600 px-4 py-2 text-sm font-black text-white">RED +2</div>
+                        </div>
+
+                        <div class="relative mx-auto mt-6 aspect-square max-w-[420px] rounded-full border-[18px] border-blue-600 bg-white shadow-2xl">
+                            <div class="absolute inset-[14%] rounded-full border-[18px] border-white bg-red-600"></div>
+                            <div class="absolute inset-[31%] rounded-full border-[14px] border-white bg-blue-600"></div>
+                            <div class="absolute inset-[44%] rounded-full bg-white"></div>
+                            <div class="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black"></div>
+
+                            <div class="absolute left-[47%] top-[36%] flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-lg font-black text-white ring-4 ring-white">R</div>
+                            <div class="absolute left-[56%] top-[42%] flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-lg font-black text-white ring-4 ring-white">R</div>
+                            <div class="absolute left-[33%] top-[53%] flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-lg font-black text-black ring-4 ring-white">Y</div>
+                            <div class="absolute left-[66%] top-[63%] flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-lg font-black text-black ring-4 ring-white">Y</div>
+                        </div>
+
+                        <div class="mt-5 grid gap-3 md:grid-cols-3">
+                            <div class="rounded-2xl bg-zinc-100 p-4">
+                                <p class="font-black">Closest stone?</p>
+                                <p class="mt-1 text-sm text-zinc-600">Red is closest.</p>
+                            </div>
+                            <div class="rounded-2xl bg-zinc-100 p-4">
+                                <p class="font-black">How many count?</p>
+                                <p class="mt-1 text-sm text-zinc-600">Two red stones beat Yellow’s best.</p>
+                            </div>
+                            <div class="rounded-2xl bg-zinc-100 p-4">
+                                <p class="font-black">Score</p>
+                                <p class="mt-1 text-sm text-zinc-600">Red scores 2 points.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
 
         @if (session('success'))
-            <div class="mb-5 rounded-2xl border border-green-500/30 bg-green-500/10 px-5 py-4 text-green-200">
+            <div class="mb-4 shrink-0 rounded-2xl border border-green-500/30 bg-green-500/10 px-5 py-3 text-green-200">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="mb-5 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-red-200">
+            <div class="mb-4 shrink-0 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-red-200">
                 {{ session('error') }}
             </div>
         @endif
 
         @if (! $session)
-            <section class="rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
-                <h2 class="text-4xl font-black">No active game</h2>
-                <p class="mt-3 text-zinc-400">Ask a team member to launch {{ $resource->name }} from the staff dashboard.</p>
-                <p class="mt-6 inline-flex rounded-2xl bg-red-600 px-6 py-4 font-black">
-                    Waiting for staff to launch this lane
-                </p>
+            <section class="flex min-h-0 flex-1 items-center justify-center rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wider text-red-400">{{ $resource->name }}</p>
+                    <h2 class="mt-3 text-5xl font-black">Waiting for staff</h2>
+                    <p class="mt-3 text-zinc-400">This lane will update automatically when staff launch the game.</p>
+                    <p class="mt-6 inline-flex rounded-2xl bg-red-600 px-6 py-4 font-black">
+                        Ready when you are
+                    </p>
+                    <button type="button" onclick="openHowToPlayModal()" class="mt-4 inline-flex rounded-2xl border border-white/10 bg-white/10 px-6 py-4 font-black hover:bg-white/20">
+                        Learn How to Play
+                    </button>
+                </div>
             </section>
         @elseif ($session->status === 'setup')
-            <section class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-                <form method="POST" action="{{ route('play.setup', $session) }}" class="rounded-3xl border border-white/10 bg-zinc-900 p-6">
+            <section class="grid min-h-0 flex-1 gap-3 overflow-hidden lg:grid-cols-[1fr_340px]">
+                <form method="POST" action="{{ route('play.setup', $session) }}" class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-4 sm:p-5">
                     @csrf
-                    <div class="mb-6">
-                        <p class="text-sm font-bold uppercase tracking-wider text-red-400">Game lobby</p>
-                        <h2 class="text-4xl font-black">Build your teams</h2>
-                        <p class="mt-2 text-zinc-400">Add players one by one, then split teams manually or randomise them.</p>
+
+                    <div class="mb-4 flex shrink-0 items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-red-400">Game lobby</p>
+                            <h2 class="text-4xl font-black leading-none">Add your players</h2>
+                            <p class="mt-1 text-sm text-zinc-400">One name at a time. Add, cheer, repeat.</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/10 px-4 py-3 text-right">
+                            <p class="text-xs font-black uppercase tracking-wider text-zinc-400">Players added</p>
+                            <p id="totalPlayerCount" class="text-3xl font-black">0</p>
+                        </div>
                     </div>
 
-                    <div class="grid gap-4 md:grid-cols-2">
+                    <div class="grid shrink-0 gap-3 md:grid-cols-2">
                         <label>
-                            <span class="mb-2 block font-bold">Team Red name</span>
-                            <input id="teamOneName" name="team_one_name" value="Stone Cold Legends" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-bold text-white" required>
+                            <span class="mb-1 block text-sm font-bold">Team Red name</span>
+                            <input id="teamOneName" name="team_one_name" value="Stone Cold Legends" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-base font-bold text-white" required>
                         </label>
                         <label>
-                            <span class="mb-2 block font-bold">Team Yellow name</span>
-                            <input id="teamTwoName" name="team_two_name" value="Curl Power" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-bold text-white" required>
+                            <span class="mb-1 block text-sm font-bold">Team Yellow name</span>
+                            <input id="teamTwoName" name="team_two_name" value="Curl Power" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-base font-bold text-white" required>
                         </label>
                     </div>
 
-                    <div class="mt-4 grid gap-3 md:grid-cols-3">
-                        <button type="button" onclick="generateTeamNames()" class="rounded-2xl bg-white px-4 py-4 font-black text-black hover:bg-zinc-200">
-                            Generate team names
+                    <div class="mt-4 grid shrink-0 gap-2 md:grid-cols-3">
+                        <button type="button" onclick="generateTeamNames()" class="rounded-2xl bg-white px-4 py-3 font-black text-black hover:bg-zinc-200">
+                            Surprise Team Names
                         </button>
-                        <button type="button" onclick="randomiseTeams()" class="rounded-2xl bg-yellow-400 px-4 py-4 font-black text-black hover:bg-yellow-300">
-                            Randomise teams
+                        <button type="button" onclick="randomiseTeams()" class="rounded-2xl bg-yellow-400 px-4 py-3 font-black text-black hover:bg-yellow-300">
+                            Shuffle Teams
                         </button>
-                        <button type="button" onclick="clearPlayers()" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 font-black hover:bg-white/20">
-                            Clear players
+                        <button type="button" onclick="clearPlayers()" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black hover:bg-white/20">
+                            Reset Lobby
                         </button>
                     </div>
 
-                    <div class="mt-6 rounded-3xl bg-black/40 p-5">
-                        <div class="flex flex-col gap-3 md:flex-row md:items-end">
-                            <label class="flex-1">
-                                <span class="mb-2 block font-bold">Add player</span>
-                                <input id="playerNameInput" type="text" placeholder="Enter player name" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-bold text-white">
-                            </label>
-                            <button type="button" onclick="addPlayer()" class="rounded-2xl bg-red-600 px-6 py-4 text-lg font-black hover:bg-red-500">
-                                Add to lobby
-                            </button>
+                    <div class="mt-4 grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_1fr]">
+                        <div class="flex min-h-0 flex-col rounded-[2rem] border border-red-500/20 bg-gradient-to-br from-red-600/20 to-black p-4 sm:p-5">
+                            <div class="flex shrink-0 items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-black uppercase tracking-wider text-red-300">Step 1</p>
+                                    <h3 class="text-3xl font-black">Who is playing?</h3>
+                                </div>
+                                <div class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-zinc-300">Player setup</div>
+                            </div>
+
+                            <div class="mt-6 flex flex-1 flex-col items-center justify-center text-center">
+                                <div id="lastPlayerAdded" class="mb-5 hidden rounded-3xl border border-green-500/30 bg-green-500/10 px-6 py-4 text-green-200">
+                                    <p class="text-xs font-black uppercase tracking-wider">Player locked in</p>
+                                    <p id="lastPlayerAddedName" class="mt-1 text-3xl font-black"></p>
+                                </div>
+
+                                <label class="w-full max-w-xl">
+                                    <span class="mb-2 block text-lg font-black">Enter player name</span>
+                                    <input id="playerNameInput" type="text" inputmode="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type name here" class="w-full rounded-3xl border border-white/10 bg-black px-6 py-5 text-center text-3xl font-black text-white placeholder:text-zinc-600">
+                                </label>
+
+                                <div class="mt-4 grid w-full max-w-xl grid-cols-3 gap-2">
+                                    <button id="addTeamAutoButton" type="button" onclick="selectAddTeam('auto')" class="rounded-2xl bg-white px-3 py-3 font-black text-black">
+                                        Auto
+                                    </button>
+                                    <button id="addTeamOneButton" type="button" onclick="selectAddTeam('one')" class="rounded-2xl bg-white/10 px-3 py-3 font-black hover:bg-white/20">
+                                        Red
+                                    </button>
+                                    <button id="addTeamTwoButton" type="button" onclick="selectAddTeam('two')" class="rounded-2xl bg-white/10 px-3 py-3 font-black hover:bg-white/20">
+                                        Yellow
+                                    </button>
+                                </div>
+
+                                <button id="realAddPlayerButton" type="button" onclick="addPlayer()" class="mt-4 w-full max-w-xl rounded-3xl bg-red-600 px-6 py-5 text-2xl font-black active:scale-[0.98] hover:bg-red-500">
+                                    Add Player
+                                </button>
+
+                                <p id="nextPlayerPrompt" class="mt-4 text-lg font-bold text-zinc-400">Add the first player to begin.</p>
+                            </div>
                         </div>
 
-                        <div class="mt-5 grid gap-4 md:grid-cols-2">
-                            <div class="rounded-3xl border border-red-500/30 bg-red-600/10 p-4">
-                                <div class="flex items-center justify-between">
+                        <div class="grid min-h-0 gap-4 overflow-hidden">
+                            <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-red-500/30 bg-red-600/10 p-4">
+                                <div class="flex shrink-0 items-center justify-between">
                                     <h3 class="text-2xl font-black">Team Red</h3>
                                     <span id="teamOneCount" class="rounded-full bg-red-600 px-3 py-1 text-sm font-black">0</span>
                                 </div>
-                                <div id="teamOneCards" class="mt-4 grid gap-3"></div>
+                                <div id="teamOneCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
                             </div>
 
-                            <div class="rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-4">
-                                <div class="flex items-center justify-between">
+                            <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-4">
+                                <div class="flex shrink-0 items-center justify-between">
                                     <h3 class="text-2xl font-black text-yellow-200">Team Yellow</h3>
                                     <span id="teamTwoCount" class="rounded-full bg-yellow-400 px-3 py-1 text-sm font-black text-black">0</span>
                                 </div>
-                                <div id="teamTwoCards" class="mt-4 grid gap-3"></div>
+                                <div id="teamTwoCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
                             </div>
                         </div>
-
-                        <div id="hiddenPlayers"></div>
                     </div>
 
-                    <button type="submit" class="mt-6 w-full rounded-3xl bg-red-600 px-6 py-5 text-2xl font-black hover:bg-red-500">
+                    <div id="hiddenPlayers"></div>
+
+                    <button type="submit" class="mt-3 w-full shrink-0 rounded-3xl bg-red-600 px-6 py-4 text-2xl font-black active:scale-[0.98] hover:bg-red-500">
                         Save Teams
                     </button>
                 </form>
 
-                @if ($session->teams->count() >= 2)
-                    <form method="POST" action="{{ route('play.start', $session) }}" class="rounded-3xl border border-green-500/30 bg-green-500/10 p-6 lg:col-span-2">
-                        @csrf
-
-                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <p class="text-sm font-bold uppercase tracking-wider text-green-300">Teams saved</p>
-                                <h3 class="text-3xl font-black">Ready to start?</h3>
-                                <p class="mt-2 text-green-100/80">Press Start Game when everyone is ready. The countdown starts immediately.</p>
-                            </div>
-
-                            <button type="submit" class="rounded-3xl bg-white px-8 py-5 text-2xl font-black text-black hover:bg-zinc-200">
-                                Start Game
-                            </button>
-                        </div>
-                    </form>
-                @endif
-
-                <aside class="space-y-6">
-                    <section class="rounded-3xl border border-white/10 bg-white/5 p-6">
+                <aside class="grid min-h-0 gap-4 overflow-hidden">
+                    <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
                         <p class="text-sm font-bold uppercase tracking-wider text-red-400">Game length</p>
                         <p class="mt-2 text-5xl font-black">{{ $session->duration_minutes }} mins</p>
                     </section>
 
-                    <section class="rounded-3xl border border-white/10 bg-white/5 p-6">
-                        <h3 class="text-2xl font-black">Playard team name generator</h3>
-                        <p class="mt-2 text-zinc-400">Tap generate to instantly fill both team names with something better than Team A and Team B.</p>
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            @foreach ($funNames as $name)
-                                <span class="rounded-full bg-white/10 px-3 py-2 text-sm font-bold">{{ $name }}</span>
-                            @endforeach
-                        </div>
+                    <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                        <h3 class="text-2xl font-black">Need the rules?</h3>
+                        <p class="mt-2 text-sm text-zinc-400">Open the quick guide without leaving the game screen.</p>
+                        <button type="button" onclick="openHowToPlayModal()" class="mt-4 inline-flex w-full justify-center rounded-2xl bg-white px-5 py-4 text-lg font-black text-black hover:bg-zinc-200">
+                            How to Play
+                        </button>
                     </section>
 
-                    <section class="rounded-3xl border border-white/10 bg-white/5 p-6">
-                        <h3 class="text-2xl font-black">How to play</h3>
-                        <ol class="mt-4 list-decimal space-y-2 pl-5 text-zinc-300">
-                            <li>Split into two teams.</li>
-                            <li>Take turns sliding stones towards the target.</li>
-                            <li>The closest stone to the centre wins the round.</li>
-                            <li>Only one team scores each round.</li>
-                            <li>Score one point for each stone closer than the opponent's best stone.</li>
-                            <li>Highest score wins. If tied, play sudden death.</li>
-                        </ol>
-                    </section>
+                    @if ($session->teams->count() >= 2)
+                        <form method="POST" action="{{ route('play.start', $session) }}" class="rounded-3xl border border-green-500/30 bg-green-500/10 p-5">
+                            @csrf
+                            <p class="text-sm font-bold uppercase tracking-wider text-green-300">Teams saved</p>
+                            <h3 class="mt-2 text-3xl font-black">Ready?</h3>
+                            <p class="mt-2 text-sm text-green-100/80">Press Start Game when everyone is ready.</p>
+                            <button type="submit" class="mt-4 w-full rounded-3xl bg-white px-6 py-5 text-2xl font-black text-black hover:bg-zinc-200">
+                                Start Game
+                            </button>
+                        </form>
+                    @else
+                        <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
+                            <p class="text-sm font-bold uppercase tracking-wider text-zinc-400">Next step</p>
+                            <h3 class="mt-2 text-3xl font-black">Build the lobby</h3>
+                            <p class="mt-2 text-sm text-zinc-400">Add players one by one, then save the teams.</p>
+                        </section>
+                    @endif
                 </aside>
             </section>
         @elseif ($session->status === 'playing')
             @php
                 $teams = $session->teams;
-                $teamOne = $teams->get(0);
-                $teamTwo = $teams->get(1);
                 $endsAt = optional($session->ends_at)->toIso8601String();
             @endphp
 
-            <section class="grid gap-6 lg:grid-cols-[1fr_420px]">
-                <div class="rounded-3xl border border-white/10 bg-zinc-900 p-6">
+            <section class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_380px]">
+                <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-5">
                     <div class="text-center">
-                        <p class="text-sm font-bold uppercase tracking-wider text-red-400">Time left</p>
-                        <div id="countdown" data-ends-at="{{ $endsAt }}" class="mt-2 text-8xl font-black tracking-tight md:text-9xl">
+                        <p class="text-xs font-bold uppercase tracking-wider text-red-400">Time left</p>
+                        <div id="countdown" data-ends-at="{{ $endsAt }}" class="mt-1 text-7xl font-black tracking-tight md:text-8xl">
                             --:--
                         </div>
                     </div>
 
-                    <div class="mt-8 grid gap-4 md:grid-cols-2">
+                    <div class="mt-5 grid gap-4 md:grid-cols-2">
                         @foreach ($teams as $team)
-                            <div class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600' : 'bg-yellow-400 text-black' }} p-6 text-center">
+                            <div class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600' : 'bg-yellow-400 text-black' }} p-5 text-center">
                                 <p class="text-xl font-black uppercase">{{ $team->name }}</p>
-                                <p class="mt-4 text-8xl font-black">{{ $team->total_score }}</p>
-                                <div class="mt-4 text-sm font-bold opacity-80">
+                                <p class="mt-2 text-7xl font-black">{{ $team->total_score }}</p>
+                                <div class="mt-2 truncate text-sm font-bold opacity-80">
                                     @foreach ($team->players as $player)
                                         <span>{{ $player->name }}</span>@if (! $loop->last), @endif
                                     @endforeach
@@ -200,44 +355,49 @@
                         @endforeach
                     </div>
 
-                    <form id="scoreForm" method="POST" action="{{ route('play.score', $session) }}" class="mt-6 rounded-3xl bg-black/40 p-5">
+                    <form id="scoreForm" method="POST" action="{{ route('play.score', $session) }}" class="mt-5 rounded-3xl bg-black/40 p-4">
                         @csrf
 
                         <input id="winningTeamInput" type="hidden" name="winning_team_id">
                         <input id="pointsInput" type="hidden" name="points" value="0">
 
-                        <h3 class="text-2xl font-black">Add round score</h3>
-                        <p class="mt-1 text-zinc-400">Tap winner, tap points, save instantly.</p>
+                        <div class="flex items-end justify-between gap-4">
+                            <div>
+                                <h3 class="text-2xl font-black">Add score</h3>
+                                <p class="mt-1 text-sm text-zinc-400">Tap winner, tap points, save.</p>
+                            </div>
+                            <p class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-zinc-300">Round {{ $session->rounds->count() + 1 }}</p>
+                        </div>
 
-                        <div class="mt-4 grid gap-4 md:grid-cols-2">
+                        <div class="mt-4 grid gap-3 md:grid-cols-2">
                             @foreach ($teams as $team)
                                 <button
                                     type="button"
                                     data-team-button
                                     data-team-id="{{ $team->id }}"
                                     onclick="selectWinningTeam('{{ $team->id }}')"
-                                    class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black' }} px-5 py-6 text-2xl font-black opacity-80 transition hover:opacity-100"
+                                    class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black' }} px-5 py-5 text-xl font-black opacity-80 transition hover:opacity-100"
                                 >
                                     {{ $team->name }} won
                                 </button>
                             @endforeach
                         </div>
 
-                        <div class="mt-4 grid grid-cols-5 gap-3">
+                        <div class="mt-3 grid grid-cols-5 gap-2">
                             @foreach ([0,1,2,3,4] as $point)
                                 <button
                                     type="button"
                                     data-point-button
                                     data-point="{{ $point }}"
                                     onclick="selectPoints('{{ $point }}')"
-                                    class="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 text-2xl font-black hover:bg-white/20"
+                                    class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-2xl font-black hover:bg-white/20"
                                 >
                                     {{ $point }}
                                 </button>
                             @endforeach
                         </div>
 
-                        <button class="mt-4 w-full rounded-2xl bg-red-600 px-5 py-4 text-xl font-black hover:bg-red-500">
+                        <button class="mt-3 w-full rounded-2xl bg-red-600 px-5 py-3 text-xl font-black hover:bg-red-500">
                             Save Round
                         </button>
                     </form>
@@ -247,15 +407,15 @@
                     </form>
                 </div>
 
-                <aside class="space-y-6">
-                    <section class="rounded-3xl border border-white/10 bg-white/5 p-6">
+                <aside class="min-h-0 space-y-4 overflow-hidden">
+                    <section class="max-h-[calc(100vh-220px)] overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5">
                         <h3 class="text-2xl font-black">Rounds</h3>
-                        <div class="mt-4 space-y-3">
+                        <div class="thin-scrollbar mt-3 max-h-[calc(100vh-330px)] space-y-2 overflow-y-auto pr-1">
                             @forelse ($session->rounds->sortByDesc('round_number') as $round)
-                                <div class="rounded-2xl bg-black/40 p-4">
+                                <div class="rounded-2xl bg-black/40 p-3">
                                     <p class="font-black">Round {{ $round->round_number }}</p>
-                                    <p class="text-zinc-300">{{ $round->winningTeam?->name ?? 'No score' }} scored {{ $round->points }}</p>
-                                    <p class="mt-1 text-sm text-zinc-400">{{ $round->commentary }}</p>
+                                    <p class="text-sm text-zinc-300">{{ $round->winningTeam?->name ?? 'No score' }} scored {{ $round->points }}</p>
+                                    <p class="mt-1 text-xs text-zinc-400">{{ $round->commentary }}</p>
                                 </div>
                             @empty
                                 <p class="text-zinc-400">No rounds scored yet.</p>
@@ -265,8 +425,8 @@
 
                     <form method="POST" action="{{ route('staff.sessions.end', $session) }}">
                         @csrf
-                        <button class="w-full rounded-3xl bg-white px-6 py-5 text-2xl font-black text-black hover:bg-zinc-200">
-                            End Game
+                        <button class="w-full rounded-3xl bg-white px-6 py-4 text-2xl font-black text-black hover:bg-zinc-200">
+                            Finish Game
                         </button>
                     </form>
                 </aside>
@@ -274,45 +434,44 @@
         @elseif ($session->status === 'finished')
             @php
                 $teams = $session->teams->sortByDesc('total_score')->values();
-                $winner = $teams->first();
             @endphp
 
-            <section class="grid gap-6 lg:grid-cols-[1fr_420px]">
-                <div class="rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
+            <section class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_380px]">
+                <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-6 text-center">
                     <p class="text-sm font-bold uppercase tracking-wider text-red-400">Final result</p>
-                    <h2 class="mt-3 text-6xl font-black">{{ $session->winner_team_name }}</h2>
-                    <p class="mt-3 text-2xl text-zinc-300">{{ $session->winner_team_name === 'Draw' ? 'It ended level. Sudden death next time.' : 'Stone cold winners.' }}</p>
+                    <h2 class="mt-2 text-5xl font-black">{{ $session->winner_team_name }}</h2>
+                    <p class="mt-2 text-xl text-zinc-300">{{ $session->winner_team_name === 'Draw' ? 'It ended level. Rematch required.' : 'Stone cold winners.' }}</p>
                     <p class="mt-3 inline-flex rounded-full bg-red-600 px-5 py-2 text-sm font-black uppercase tracking-wider">
                         Bragging rights activated
                     </p>
 
-                    <div class="mt-8 grid gap-4 md:grid-cols-2">
+                    <div class="mt-5 grid gap-4 md:grid-cols-2">
                         @foreach ($session->teams as $team)
-                            <div class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600' : 'bg-yellow-400 text-black' }} p-6">
+                            <div class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600' : 'bg-yellow-400 text-black' }} p-5">
                                 <p class="text-xl font-black">{{ $team->name }}</p>
-                                <p class="mt-3 text-8xl font-black">{{ $team->total_score }}</p>
+                                <p class="mt-2 text-7xl font-black">{{ $team->total_score }}</p>
                             </div>
                         @endforeach
                     </div>
 
-                    <div class="mt-8 flex flex-col gap-3 md:flex-row md:justify-center">
+                    <div class="mt-5 flex flex-col gap-3 md:flex-row md:justify-center">
                         <a href="{{ route('share.show', $session->share_code) }}" class="rounded-2xl bg-white px-6 py-4 font-black text-black hover:bg-zinc-200">
                             Open Share Page
                         </a>
                     </div>
                 </div>
 
-                <aside class="rounded-3xl border border-white/10 bg-white/5 p-6">
+                <aside class="thin-scrollbar min-h-0 overflow-y-auto rounded-3xl border border-white/10 bg-white/5 p-5">
                     <h3 class="text-2xl font-black">Send scorecard</h3>
-                    <p class="mt-2 text-zinc-400">Add multiple emails. Marketing export only includes people who tick the consent box.</p>
+                    <p class="mt-2 text-sm text-zinc-400">Add emails for everyone who wants the result.</p>
 
-                    <form method="POST" action="{{ route('play.emails', $session) }}" class="mt-5 space-y-3">
+                    <form method="POST" action="{{ route('play.emails', $session) }}" class="mt-4 space-y-2">
                         @csrf
                         @for ($i = 0; $i < 5; $i++)
-                            <input name="emails[]" type="email" placeholder="Email {{ $i + 1 }}" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 font-bold text-white" @if($i === 0) required @endif>
+                            <input name="emails[]" type="email" placeholder="Email {{ $i + 1 }}" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 font-bold text-white" @if($i === 0) required @endif>
                         @endfor
 
-                        <label class="flex gap-3 rounded-2xl bg-black/40 p-4 text-left">
+                        <label class="flex gap-3 rounded-2xl bg-black/40 p-3 text-left">
                             <input type="checkbox" name="marketing_consent" value="1" class="mt-1 h-5 w-5">
                             <span class="text-sm text-zinc-300">I agree to receive Playard offers, events and discounts by email.</span>
                         </label>
@@ -324,9 +483,11 @@
                 </aside>
             </section>
         @else
-            <section class="rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
-                <h2 class="text-4xl font-black">This game is {{ $session->status }}</h2>
-                <p class="mt-6 inline-flex rounded-2xl bg-red-600 px-6 py-4 font-black">Please ask staff to reset this lane.</p>
+            <section class="flex min-h-0 flex-1 items-center justify-center rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
+                <div>
+                    <h2 class="text-4xl font-black">This game is {{ $session->status }}</h2>
+                    <p class="mt-6 inline-flex rounded-2xl bg-red-600 px-6 py-4 font-black">Please ask staff to reset this lane.</p>
+                </div>
             </section>
         @endif
     </main>
@@ -334,14 +495,87 @@
     <script>
         let wakeLock = null;
         let cursorHideTimer = null;
+        let setupResetTimer = null;
+        let autoEndTriggered = false;
+        let lobbyPlayers = [];
+        let selectedAddTeam = 'auto';
+
+        const premiumTeamNames = [
+            'Stone Cold Legends',
+            'Curl Power',
+            'Sweep Dreams',
+            'The Rock Stars',
+            'House Hunters',
+            'Final Stone Heroes',
+            'The Almost Professionals',
+            'The Lucky Sliders',
+            'Questionable Tactics',
+            'The Calm Before The Score',
+            'Zero Practice Required',
+            'The Lane Stealers'
+        ];
+
+        function resetSetupAutoResetTimer() {
+            clearTimeout(setupResetTimer);
+        }
+
+        function updateConnectionIndicator(isOnline) {
+            const indicator = document.getElementById('connectionIndicator');
+            if (!indicator) return;
+
+            indicator.textContent = isOnline ? '● Live' : '● Offline';
+            indicator.classList.toggle('text-green-400', isOnline);
+            indicator.classList.toggle('text-red-400', !isOnline);
+        }
+
+        function playEndSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioContext = new AudioContext();
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                oscillator.frequency.value = 880;
+                oscillator.type = 'sine';
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+
+                gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.25, audioContext.currentTime + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.35);
+
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.4);
+            } catch (error) {
+                console.warn('End sound unavailable', error);
+            }
+        }
+
+        function openHowToPlayModal() {
+            const modal = document.getElementById('howToPlayModal');
+            if (!modal) return;
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+        }
+
+        function closeHowToPlayModal() {
+            const modal = document.getElementById('howToPlayModal');
+            if (!modal) return;
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.classList.remove('opacity-100');
+        }
 
         async function enterFullscreenMode() {
             const element = document.documentElement;
 
-            if (element.requestFullscreen) {
-                await element.requestFullscreen();
-            } else if (element.webkitRequestFullscreen) {
-                await element.webkitRequestFullscreen();
+            try {
+                if (element.requestFullscreen) {
+                    await element.requestFullscreen();
+                } else if (element.webkitRequestFullscreen) {
+                    await element.webkitRequestFullscreen();
+                }
+            } catch (error) {
+                console.warn('Fullscreen unavailable', error);
             }
 
             await requestWakeLock();
@@ -356,7 +590,6 @@
                 console.warn('Wake lock unavailable', error);
             }
         }
-
 
         function resetCursorTimer() {
             document.body.classList.remove('cursor-hidden');
@@ -380,67 +613,79 @@
             }
         }
 
-        window.addEventListener('online', () => {
-            console.log('Tablet is online');
-        });
+        function selectAddTeam(team) {
+            selectedAddTeam = team;
 
-        window.addEventListener('offline', showConnectionStatus);
+            const buttons = {
+                auto: document.getElementById('addTeamAutoButton'),
+                one: document.getElementById('addTeamOneButton'),
+                two: document.getElementById('addTeamTwoButton'),
+            };
 
-        document.addEventListener('visibilitychange', async () => {
-            if (document.visibilityState === 'visible') {
-                await requestWakeLock();
+            Object.values(buttons).forEach((button) => {
+                if (!button) return;
+                button.classList.remove('bg-white', 'text-black');
+                button.classList.add('bg-white/10');
+            });
+
+            if (buttons[team]) {
+                buttons[team].classList.add('bg-white', 'text-black');
+                buttons[team].classList.remove('bg-white/10');
             }
-        });
-
-        document.addEventListener('mousemove', resetCursorTimer);
-        document.addEventListener('touchstart', resetCursorTimer);
-
-        protectKioskNavigation();
-        resetCursorTimer();
-
-        let lobbyPlayers = [];
-
-        const premiumTeamNames = [
-            'Stone Cold Legends',
-            'Curl Power',
-            'Sweep Dreams',
-            'The Rock Stars',
-            'House Hunters',
-            'Final Stone Heroes',
-            'The Almost Professionals',
-            'The Lucky Sliders',
-            'Questionable Tactics',
-            'The Calm Before The Score',
-            'Zero Practice Required',
-            'The Lane Stealers'
-        ];
+        }
 
         function addPlayer() {
             const input = document.getElementById('playerNameInput');
             if (!input) return;
 
             const name = input.value.trim();
-            if (!name) return;
+            if (!name) {
+                input.focus();
+                input.classList.add('ring-4', 'ring-red-500');
+                setTimeout(() => input.classList.remove('ring-4', 'ring-red-500'), 700);
+                return;
+            }
 
             const teamOneCount = lobbyPlayers.filter(player => player.team === 'one').length;
             const teamTwoCount = lobbyPlayers.filter(player => player.team === 'two').length;
+            const team = selectedAddTeam === 'auto'
+                ? (teamOneCount <= teamTwoCount ? 'one' : 'two')
+                : selectedAddTeam;
 
-            lobbyPlayers.push({
-                name,
-                team: teamOneCount <= teamTwoCount ? 'one' : 'two'
-            });
+            lobbyPlayers.push({ name, team });
+
+            const lastPlayerAdded = document.getElementById('lastPlayerAdded');
+            const lastPlayerAddedName = document.getElementById('lastPlayerAddedName');
+            const nextPlayerPrompt = document.getElementById('nextPlayerPrompt');
+
+            if (lastPlayerAdded && lastPlayerAddedName) {
+                lastPlayerAddedName.textContent = name + ' joined ' + (team === 'one' ? 'Team Red' : 'Team Yellow');
+                lastPlayerAdded.classList.remove('hidden');
+            }
+
+            if (nextPlayerPrompt) {
+                nextPlayerPrompt.textContent = 'Nice. Add the next player.';
+            }
 
             input.value = '';
+            input.placeholder = 'Add another player';
+            resetSetupAutoResetTimer();
             renderLobbyPlayers();
+
+            setTimeout(() => {
+                input.focus();
+            }, 50);
         }
 
         function removePlayer(index) {
             lobbyPlayers.splice(index, 1);
+            resetSetupAutoResetTimer();
             renderLobbyPlayers();
         }
 
         function movePlayer(index, team) {
             lobbyPlayers[index].team = team;
+            resetSetupAutoResetTimer();
             renderLobbyPlayers();
         }
 
@@ -452,11 +697,27 @@
                     team: index % 2 === 0 ? 'one' : 'two'
                 }));
 
+            resetSetupAutoResetTimer();
             renderLobbyPlayers();
         }
 
         function clearPlayers() {
             lobbyPlayers = [];
+
+            const lastPlayerAdded = document.getElementById('lastPlayerAdded');
+            const nextPlayerPrompt = document.getElementById('nextPlayerPrompt');
+
+            if (lastPlayerAdded) lastPlayerAdded.classList.add('hidden');
+            if (nextPlayerPrompt) nextPlayerPrompt.textContent = 'Add the first player to begin.';
+
+            const input = document.getElementById('playerNameInput');
+            if (input) {
+                input.value = '';
+                input.placeholder = 'Type name here';
+                input.focus();
+            }
+
+            resetSetupAutoResetTimer();
             renderLobbyPlayers();
         }
 
@@ -467,6 +728,7 @@
 
             if (teamOne) teamOne.value = shuffled[0];
             if (teamTwo) teamTwo.value = shuffled[1] ?? 'Curl Power';
+            resetSetupAutoResetTimer();
         }
 
         function renderLobbyPlayers() {
@@ -475,6 +737,7 @@
             const hiddenPlayers = document.getElementById('hiddenPlayers');
             const teamOneCount = document.getElementById('teamOneCount');
             const teamTwoCount = document.getElementById('teamTwoCount');
+            const totalPlayerCount = document.getElementById('totalPlayerCount');
 
             if (!teamOneCards || !teamTwoCards || !hiddenPlayers) return;
 
@@ -484,17 +747,15 @@
 
             lobbyPlayers.forEach((player, index) => {
                 const card = document.createElement('div');
-                card.className = 'rounded-2xl border border-white/10 bg-zinc-950 p-4 shadow-xl';
+                card.className = 'group flex items-center gap-2 rounded-full border border-white/10 bg-zinc-950 px-3 py-2 shadow-xl';
                 card.innerHTML = `
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <p class="text-lg font-black">${escapeHtml(player.name)}</p>
-                            <p class="text-xs font-bold uppercase tracking-wider text-zinc-500">Ready to slide</p>
-                        </div>
-                        <button type="button" onclick="removePlayer(${index})" class="rounded-xl bg-white/10 px-3 py-2 text-sm font-black hover:bg-white/20">Remove</button>
-                    </div>
-                    <button type="button" onclick="movePlayer(${index}, '${player.team === 'one' ? 'two' : 'one'}')" class="mt-3 w-full rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-black hover:bg-white/20">
-                        Move to ${player.team === 'one' ? 'Yellow' : 'Red'}
+                    <span class="avatar-chip flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black text-black">${escapeHtml(player.name.charAt(0).toUpperCase())}</span>
+                    <span class="max-w-[120px] truncate text-sm font-black">${escapeHtml(player.name)}</span>
+                    <button type="button" onclick="movePlayer(${index}, '${player.team === 'one' ? 'two' : 'one'}')" class="rounded-full bg-white/10 px-2 py-1 text-[10px] font-black hover:bg-white/20">
+                        ${player.team === 'one' ? '→ Yellow' : '→ Red'}
+                    </button>
+                    <button type="button" onclick="removePlayer(${index})" class="rounded-full bg-red-600/80 px-2 py-1 text-[10px] font-black hover:bg-red-500">
+                        ×
                     </button>
                 `;
 
@@ -515,46 +776,25 @@
 
             if (teamOneCount) teamOneCount.textContent = oneCount;
             if (teamTwoCount) teamTwoCount.textContent = twoCount;
+            if (totalPlayerCount) totalPlayerCount.textContent = lobbyPlayers.length;
 
             if (oneCount === 0) {
-                teamOneCards.innerHTML = '<p class="rounded-2xl bg-black/30 p-4 text-zinc-500">No players yet.</p>';
+                teamOneCards.innerHTML = '<p class="rounded-2xl bg-black/30 p-4 text-sm text-zinc-500">Waiting for Red players.</p>';
             }
 
             if (twoCount === 0) {
-                teamTwoCards.innerHTML = '<p class="rounded-2xl bg-black/30 p-4 text-zinc-500">No players yet.</p>';
+                teamTwoCards.innerHTML = '<p class="rounded-2xl bg-black/30 p-4 text-sm text-zinc-500">Waiting for Yellow players.</p>';
             }
         }
 
         function escapeHtml(value) {
-            return value
+            return String(value)
                 .replaceAll('&', '&amp;')
                 .replaceAll('<', '&lt;')
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const input = document.getElementById('playerNameInput');
-            if (input) {
-                input.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        addPlayer();
-                    }
-                });
-            }
-
-            enterFullscreenMode();
-            renderLobbyPlayers();
-            selectPoints('0');
-
-            @if ($session && $session->status === 'finished')
-                launchWinnerConfetti();
-            @endif
-        });
-
-        let autoEndTriggered = false;
 
         function selectWinningTeam(teamId) {
             const input = document.getElementById('winningTeamInput');
@@ -597,19 +837,8 @@
             const end = Date.now() + duration;
 
             (function frame() {
-                confetti({
-                    particleCount: 4,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                });
-
-                confetti({
-                    particleCount: 4,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                });
+                confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 } });
 
                 if (Date.now() < end) {
                     requestAnimationFrame(frame);
@@ -632,6 +861,7 @@
             if (diff === 0 && !autoEndTriggered) {
                 autoEndTriggered = true;
                 el.textContent = 'TIME UP';
+                playEndSound();
 
                 const autoEndForm = document.getElementById('autoEndForm');
 
@@ -641,9 +871,83 @@
             }
         }
 
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-        requestWakeLock();
+        function connectLaneRealtimeUpdates() {
+            const resourceId = @json($resource->id);
+
+            if (!window.Echo || !resourceId) {
+                console.warn('Realtime updates are not ready yet.');
+                updateConnectionIndicator(false);
+                return;
+            }
+
+            updateConnectionIndicator(true);
+
+            window.Echo.channel(`lane.${resourceId}`)
+                .listen('.game.session.updated', (event) => {
+                    console.log('Lane updated', event);
+
+                    const currentStatus = @json($session?->status);
+                    const nextStatus = event.status;
+
+                    if (currentStatus !== nextStatus) {
+                        window.location.reload();
+                        return;
+                    }
+
+                    if (['playing', 'paused', 'finished', 'setup'].includes(nextStatus)) {
+                        window.location.reload();
+                    }
+                });
+        }
+
+        window.addEventListener('online', () => {
+            console.log('Tablet is online');
+            updateConnectionIndicator(true);
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionIndicator(false);
+            showConnectionStatus();
+        });
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+
+        document.addEventListener('mousemove', resetCursorTimer);
+        document.addEventListener('touchstart', resetCursorTimer);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeHowToPlayModal();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('playerNameInput');
+            if (input) {
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        addPlayer();
+                    }
+                });
+            }
+
+            protectKioskNavigation();
+            resetCursorTimer();
+            updateConnectionIndicator(navigator.onLine);
+            selectAddTeam('auto');
+            renderLobbyPlayers();
+            selectPoints('0');
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+            setTimeout(connectLaneRealtimeUpdates, 500);
+            requestWakeLock();
+
+            @if ($session && $session->status === 'finished')
+                launchWinnerConfetti();
+            @endif
+        });
     </script>
-</body>
-</html>

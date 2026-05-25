@@ -13,26 +13,116 @@
         $winner = $teams->first();
         $runnerUp = $teams->skip(1)->first();
         $shareUrl = route('share.show', $session->share_code);
-        $shareText = urlencode('We just played curling at Playard. Check out our score.');
+        $shareTextOptions = [
+            'We just played curling at Playard and the scoreboard has receipts.',
+            'Curling happened at Playard. Bragging rights may be involved.',
+            'We played curling at Playard. The result is dramatic and possibly controversial.',
+            'Fresh from the Playard curling lane. Come and judge the score yourself.',
+            'The Playard curling result is in. Some people are handling it better than others.',
+        ];
+        $shareText = urlencode($shareTextOptions[array_rand($shareTextOptions)]);
         $winnerName = $session->winner_team_name ?: ($winner?->name ?? 'Game Results');
         $winnerScore = $winner?->total_score ?? 0;
         $runnerUpScore = $runnerUp?->total_score ?? 0;
         $scoreDifference = abs($winnerScore - $runnerUpScore);
         $totalRounds = $session->rounds->count();
-        $badge = match (true) {
-            $session->winner_team_name === 'Draw' => 'No winners, just unresolved tension',
-            $scoreDifference >= 6 => 'Absolute lane domination',
-            $scoreDifference >= 3 => 'Comfortable bragging rights',
-            $scoreDifference === 1 => 'Won by pure nerve',
-            default => 'Stone cold winners',
-        };
-        $verdict = match (true) {
-            $session->winner_team_name === 'Draw' => 'This one ended level. Someone owes everyone a sudden death rematch.',
-            $scoreDifference >= 6 => $winnerName . ' did not come to make friends. They came to empty the lane.',
-            $scoreDifference >= 3 => $winnerName . ' kept it calm, clinical, and slightly annoying for everyone else.',
-            $scoreDifference === 1 => $winnerName . ' escaped with the win. VAR would probably have been requested.',
-            default => $winnerName . ' took the win and the bragging rights are now legally binding.',
-        };
+
+        $drawBadges = [
+            'No winners, maximum drama',
+            'Unfinished business detected',
+            'The lane refused to pick a side',
+            'A very suspicious draw',
+            'Tension level: Playard certified',
+        ];
+
+        $bigWinBadges = [
+            'Absolute lane domination',
+            'Public curling announcement',
+            'Mercy was not available',
+            'Main character performance',
+            'The target has been conquered',
+        ];
+
+        $comfortableWinBadges = [
+            'Comfortable bragging rights',
+            'Controlled chaos, tidy win',
+            'A calm and annoying victory',
+            'Quietly ruthless',
+            'The lane was handled',
+        ];
+
+        $closeWinBadges = [
+            'Won by pure nerve',
+            'One point. Many opinions.',
+            'Tiny margin, massive ego boost',
+            'A win is a win',
+            'Nervy scenes at Playard',
+        ];
+
+        $defaultBadges = [
+            'Stone cold winners',
+            'Bragging rights unlocked',
+            'Certified lane legends',
+            'Winners by appointment',
+            'The scoreboard has spoken',
+        ];
+
+        $drawVerdicts = [
+            'This one ended level. Nobody gets peace until there is a rematch.',
+            'A draw. The scoreboard shrugged and walked away.',
+            'Level scores. Both teams are now legally required to argue about the closest stone.',
+            'No winner today. Just unfinished business and suspicious confidence from both sides.',
+            'A perfectly balanced game, which is another way of saying everyone is still talking too much.',
+        ];
+
+        $bigWinVerdicts = [
+            $winnerName . ' did not come to make friends. They came to empty the lane.',
+            $winnerName . ' treated this like a training drill and everyone else like background extras.',
+            $winnerName . ' put on a curling clinic. Attendance was not optional.',
+            $winnerName . ' won so clearly the scoreboard may need a lie down.',
+            $winnerName . ' slid, scored, and left emotional damage on the lane.',
+        ];
+
+        $comfortableWinVerdicts = [
+            $winnerName . ' kept it calm, clinical, and slightly annoying for everyone else.',
+            $winnerName . ' never looked worried, which was rude but effective.',
+            $winnerName . ' took control early and refused to give the drama department anything to work with.',
+            $winnerName . ' won with the kind of confidence that makes opponents check the rules twice.',
+            $winnerName . ' delivered a solid win and will probably mention it all evening.',
+        ];
+
+        $closeWinVerdicts = [
+            $winnerName . ' escaped with the win. VAR would probably have been requested.',
+            $winnerName . ' won by a margin so small it deserves its own investigation.',
+            $winnerName . ' survived the pressure and will now pretend it was comfortable.',
+            $winnerName . ' took the win by one point and immediately became impossible to live with.',
+            $winnerName . ' won the tight one. The losing team is already preparing a speech about luck.',
+        ];
+
+        $defaultVerdicts = [
+            $winnerName . ' took the win and the bragging rights are now legally binding.',
+            $winnerName . ' got the job done. The lane has confirmed it in writing.',
+            $winnerName . ' came, curled, conquered, and posed for the imaginary cameras.',
+            $winnerName . ' secured the win. Complaints can be submitted directly to the scoreboard.',
+            $winnerName . ' won fair and square, unless you ask the other team.',
+        ];
+
+        if ($session->winner_team_name === 'Draw') {
+            $badge = $drawBadges[array_rand($drawBadges)];
+            $verdict = $drawVerdicts[array_rand($drawVerdicts)];
+        } elseif ($scoreDifference >= 6) {
+            $badge = $bigWinBadges[array_rand($bigWinBadges)];
+            $verdict = $bigWinVerdicts[array_rand($bigWinVerdicts)];
+        } elseif ($scoreDifference >= 3) {
+            $badge = $comfortableWinBadges[array_rand($comfortableWinBadges)];
+            $verdict = $comfortableWinVerdicts[array_rand($comfortableWinVerdicts)];
+        } elseif ($scoreDifference === 1) {
+            $badge = $closeWinBadges[array_rand($closeWinBadges)];
+            $verdict = $closeWinVerdicts[array_rand($closeWinVerdicts)];
+        } else {
+            $badge = $defaultBadges[array_rand($defaultBadges)];
+            $verdict = $defaultVerdicts[array_rand($defaultVerdicts)];
+        }
     @endphp
 
     <main class="mx-auto max-w-6xl px-5 py-8">
@@ -102,7 +192,7 @@
                         </div>
                         <div class="rounded-2xl bg-black/30 px-4 py-3">
                             <p class="text-xs font-black uppercase tracking-wider text-red-300">Tag us</p>
-                            <p class="font-black">Show us your win</p>
+                            <p class="font-black">Show us the drama</p>
                         </div>
                     </div>
                 </div>
@@ -171,7 +261,7 @@
                         <p class="text-lg font-black">{{ $session->resource->name }} at Playard</p>
                         <p class="mt-1 text-sm text-zinc-300">Games. Drinks. Good times.</p>
                         <div class="mt-5 rounded-3xl bg-white px-4 py-3 text-black">
-                            <p class="text-xs font-black uppercase tracking-wider text-red-600">Book your rematch</p>
+                            <p class="text-xs font-black uppercase tracking-wider text-red-600">Book the comeback</p>
                             <p class="text-xl font-black">www.playard.co.uk</p>
                         </div>
                         <p class="mt-3 text-sm font-black text-zinc-200">Follow and tag @playardpeterborough</p>

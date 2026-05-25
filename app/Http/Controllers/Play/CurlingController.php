@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Play;
 
+use App\Events\GameSessionUpdated;
+
 use App\Http\Controllers\Controller;
 use App\Mail\GameResultsMail;
 use App\Models\Activity;
@@ -72,6 +74,8 @@ class CurlingController extends Controller
                 ],
             ],
         ]);
+
+        GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
             ->route('play.tablet', $resource)
@@ -154,6 +158,8 @@ class CurlingController extends Controller
             'ends_at' => now()->addMinutes($session->duration_minutes),
         ]);
 
+        GameSessionUpdated::dispatch($session->fresh());
+
         return redirect()
             ->route('play.tablet', $session->resource)
             ->with('success', 'Timer started. Game on.');
@@ -188,6 +194,7 @@ class CurlingController extends Controller
         }
 
         $this->recalculateTotals($session->fresh());
+        GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
             ->route('play.tablet', $session->resource)
@@ -197,6 +204,7 @@ class CurlingController extends Controller
     public function endGame(GameSession $session): RedirectResponse
     {
         $this->finishSession($session);
+        GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
             ->route('play.tablet', $session->resource)
@@ -236,6 +244,8 @@ class CurlingController extends Controller
             'metadata' => $metadata,
         ]);
 
+        GameSessionUpdated::dispatch($session->fresh());
+
         return back()->with('success', 'Game paused.');
     }
 
@@ -255,6 +265,8 @@ class CurlingController extends Controller
             'ends_at' => now()->addSeconds($remainingSeconds),
             'metadata' => $metadata,
         ]);
+
+        GameSessionUpdated::dispatch($session->fresh());
 
         return back()->with('success', 'Game resumed.');
     }
@@ -282,6 +294,8 @@ class CurlingController extends Controller
                 'duration_minutes' => $session->duration_minutes + $minutes,
             ]);
         }
+
+        GameSessionUpdated::dispatch($session->fresh());
 
         return back()->with('success', $minutes . ' minutes added.');
     }
