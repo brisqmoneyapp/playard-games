@@ -46,7 +46,7 @@
             <div>
                 <div class="inline-flex rounded-xl bg-red-600 px-4 py-2 text-2xl font-black tracking-tight">PLAYARD</div>
                 <h1 class="mt-4 text-4xl font-black">Games Staff Dashboard</h1>
-                <p class="mt-2 text-zinc-400">Super admin view for all active lane timers, staff controls and tablet screens.</p>
+                <p class="mt-2 text-zinc-400">Manage live games, lane timers, customer screens and scoring.</p>
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row">
@@ -76,7 +76,7 @@
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h2 class="text-2xl font-black">Curling lanes</h2>
-                    <p class="text-zinc-400">Choose 30 minutes or 60 minutes, launch a lane, monitor timers and export consented customer emails for Funbutler.</p>
+                    <p class="text-zinc-400">Launch lanes, control live timers and manage customer game sessions.</p>
                 </div>
                 <div class="rounded-full bg-red-600 px-4 py-2 text-sm font-black uppercase tracking-wide">
                     {{ $resources->count() }} active lanes
@@ -84,7 +84,7 @@
             </div>
         </section>
 
-        <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($resources as $resource)
                 @php
                     $activeSession = $resource->sessions->first();
@@ -98,15 +98,16 @@
                             <h3 class="text-3xl font-black">{{ $resource->name }}</h3>
                         </div>
                         <span class="rounded-full px-3 py-1 text-xs font-black uppercase {{ $activeSession ? 'bg-yellow-400 text-black' : 'bg-green-500 text-black' }}">
-                            {{ $activeSession ? $activeSession->status : 'free' }}
+                            {{ $activeSession ? strtoupper($activeSession->status) : 'READY' }}
                         </span>
                     </div>
 
                     @if ($activeSession)
                         <div class="mb-4 rounded-2xl bg-black/40 p-4">
                             <p class="text-sm text-zinc-400">Current game</p>
-                            <p class="mt-1 font-bold">{{ $activeSession->duration_minutes }} minutes</p>
+                            <p class="mt-1 font-bold">Booked for {{ $activeSession->duration_minutes }} minutes</p>
                             <p class="text-sm text-zinc-400">Share code: {{ $activeSession->share_code }}</p>
+                            <p class="mt-2 text-xs font-black uppercase tracking-wider text-zinc-500">Status: {{ strtoupper($activeSession->status) }}</p>
 
                             <div class="mt-4 rounded-2xl border border-white/10 bg-zinc-950 p-4 text-center">
                                 <p class="text-xs font-black uppercase tracking-wider text-red-400">Timer</p>
@@ -123,77 +124,99 @@
                         </div>
 
                         <div class="grid gap-3">
-                            @if ($activeSession->status === 'playing')
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="{{ $tabletUrl }}" target="_blank" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center font-black hover:bg-white/20">
+                                    View Customer Screen
+                                </a>
+
+                                <a href="{{ route('share.show', $activeSession->share_code) }}" target="_blank" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center font-black hover:bg-white/20">
+                                    View Scorecard
+                                </a>
+                            </div>
+
+                            @if ($activeSession->status === 'setup')
+                                <form method="POST" action="{{ route('play.start', $activeSession) }}">
+                                    @csrf
+                                    <button type="submit" class="w-full rounded-2xl bg-green-500 px-4 py-4 text-xl font-black text-black hover:bg-green-400">
+                                        Start Game Timer
+                                    </button>
+                                </form>
+                            @elseif ($activeSession->status === 'playing')
                                 <form method="POST" action="{{ route('staff.sessions.pause', $activeSession) }}">
                                     @csrf
-                                    <button type="submit" class="w-full rounded-2xl bg-yellow-400 px-4 py-3 font-black text-black hover:bg-yellow-300">
-                                        Pause Game
+                                    <button type="submit" class="w-full rounded-2xl bg-yellow-400 px-4 py-4 text-xl font-black text-black hover:bg-yellow-300">
+                                        Pause Timer
                                     </button>
                                 </form>
                             @elseif ($activeSession->status === 'paused')
                                 <form method="POST" action="{{ route('staff.sessions.resume', $activeSession) }}">
                                     @csrf
-                                    <button type="submit" class="w-full rounded-2xl bg-green-500 px-4 py-3 font-black text-black hover:bg-green-400">
-                                        Resume Game
+                                    <button type="submit" class="w-full rounded-2xl bg-green-500 px-4 py-4 text-xl font-black text-black hover:bg-green-400">
+                                        Resume Timer
                                     </button>
                                 </form>
+                            @elseif ($activeSession->status === 'finished')
+                                <div class="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-4 text-center font-black text-red-200">
+                                    Game finished
+                                </div>
                             @endif
 
+                            <div class="rounded-2xl border border-white/10 bg-black/30 p-3">
+                                <p class="mb-3 text-xs font-black uppercase tracking-wider text-zinc-400">Add time without leaving this page</p>
+                                <div class="grid grid-cols-3 gap-2">
+                                    @foreach ([5, 10, 30, 60, 90, 120] as $minutes)
+                                        <form method="POST" action="{{ route('staff.sessions.add-time', $activeSession) }}">
+                                            @csrf
+                                            <input type="hidden" name="minutes" value="{{ $minutes }}">
+                                            <button type="submit" class="w-full rounded-2xl border border-white/10 bg-white/10 px-3 py-3 text-sm font-black hover:bg-white/20">
+                                                +{{ $minutes }}m
+                                            </button>
+                                        </form>
+                                    @endforeach
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-3">
-                                <form method="POST" action="{{ route('staff.sessions.add-time', $activeSession) }}">
+                                <form method="POST" action="{{ route('staff.sessions.end', $activeSession) }}">
                                     @csrf
-                                    <input type="hidden" name="minutes" value="10">
-                                    <button type="submit" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black hover:bg-white/20">
-                                        Add 10 min
+                                    <button type="submit" class="w-full rounded-2xl bg-red-600 px-4 py-3 font-black hover:bg-red-500">
+                                        End Game
                                     </button>
                                 </form>
 
-                                <form method="POST" action="{{ route('staff.sessions.add-time', $activeSession) }}">
+                                <form method="POST" action="{{ route('staff.sessions.reset', $activeSession) }}" onsubmit="return confirm('Reset this lane and remove the current game?');">
                                     @csrf
-                                    <input type="hidden" name="minutes" value="30">
                                     <button type="submit" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black hover:bg-white/20">
-                                        Add 30 min
+                                        Reset Lane
                                     </button>
                                 </form>
                             </div>
-
-                            <form method="POST" action="{{ route('staff.sessions.end', $activeSession) }}">
-                                @csrf
-                                <button type="submit" class="w-full rounded-2xl bg-red-600 px-4 py-3 font-black hover:bg-red-500">
-                                    End Game
-                                </button>
-                            </form>
-
-                            <form method="POST" action="{{ route('staff.sessions.reset', $activeSession) }}">
-                                @csrf
-                                <button type="submit" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black hover:bg-white/20">
-                                    Reset Lane
-                                </button>
-                            </form>
                         </div>
                     @else
                         <form method="POST" action="{{ route('staff.resources.start', $resource) }}" class="grid gap-3">
                             @csrf
                             <label class="block">
-                                <span class="mb-2 block text-sm font-bold text-zinc-300">Game duration</span>
+                                <span class="mb-2 block text-sm font-bold text-zinc-300">Starting duration</span>
                                 <select name="duration_minutes" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 font-bold text-white">
                                     <option value="30">30 minutes</option>
                                     <option value="60">60 minutes</option>
+                                    <option value="90">1 hour 30 minutes</option>
+                                    <option value="120">2 hours</option>
                                 </select>
                             </label>
 
-                            <button type="submit" class="rounded-2xl bg-red-600 px-4 py-3 font-black hover:bg-red-500">
-                                Launch {{ $resource->name }}
+                            <button type="submit" class="rounded-2xl bg-red-600 px-4 py-4 text-xl font-black hover:bg-red-500">
+                                Create Game Lobby
                             </button>
 
-                            <a href="{{ $tabletUrl }}" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center font-black hover:bg-white/20">
-                                Open Tablet Page
+                            <a href="{{ $tabletUrl }}" target="_blank" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center font-black hover:bg-white/20">
+                                Preview Customer Screen
                             </a>
                         </form>
                     @endif
                 </article>
             @empty
-                <div class="rounded-3xl border border-white/10 bg-white/5 p-8 md:col-span-2 xl:col-span-4">
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-8 md:col-span-2 xl:col-span-3">
                     <h3 class="text-2xl font-black">No lanes found</h3>
                     <p class="mt-2 text-zinc-400">Go to Admin Panel → Resources / Lanes and add Curling Lane 1.</p>
                 </div>

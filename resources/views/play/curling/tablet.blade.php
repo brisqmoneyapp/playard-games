@@ -106,16 +106,26 @@
                         <ol class="mt-4 space-y-3 text-lg text-zinc-200">
                             <li><span class="font-black text-white">1.</span> Split into two teams: Red and Yellow.</li>
                             <li><span class="font-black text-white">2.</span> Teams take turns sliding stones towards the target.</li>
-                            <li><span class="font-black text-white">3.</span> After all stones are played, check which team has the closest stone to the centre.</li>
-                            <li><span class="font-black text-white">4.</span> Only the team with the closest stone scores in that round.</li>
-                            <li><span class="font-black text-white">5.</span> Count how many of that team’s stones are closer than the other team’s closest stone.</li>
-                            <li><span class="font-black text-white">6.</span> The team with the highest score at the end wins.</li>
-                            <li><span class="font-black text-white">7.</span> If the score is level, play one final tiebreak round.</li>
+                            <li><span class="font-black text-white">3.</span> You can knock other stones out of the way during play.</li>
+                            <li><span class="font-black text-white">4.</span> After all stones are played, check which stone is closest to the centre.</li>
+                            <li><span class="font-black text-white">5.</span> Only the team with the closest stone scores in that round.</li>
+                            <li><span class="font-black text-white">6.</span> Count how many of that team’s stones are closer than the opponent’s best stone.</li>
+                            <li><span class="font-black text-white">7.</span> The team with the highest total score wins the game.</li>
+                            <li><span class="font-black text-white">8.</span> If the score is level, play one final tiebreak round.</li>
                         </ol>
 
                         <div class="mt-5 rounded-3xl border border-red-500/30 bg-red-600/10 p-5">
                             <h4 class="text-xl font-black">Simple scoring phrase</h4>
-                            <p class="mt-2 text-zinc-300">Closest stone decides who scores. Extra stones closer than the opponent’s best stone add extra points.</p>
+                            <p class="mt-2 text-zinc-300">Closest stone wins the round. Extra stones closer than the opponent’s best stone score extra points.</p>
+
+                            <div class="mt-4 rounded-2xl bg-black/30 p-4">
+                                <p class="text-sm font-black uppercase tracking-wider text-yellow-300">Quick example</p>
+                                <p class="mt-2 text-sm text-zinc-300">
+                                    Red has the closest stone.<br>
+                                    Red also has another stone closer than Yellow’s nearest stone.<br><br>
+                                    <span class="font-black text-white">Result: Red scores 2 points.</span>
+                                </p>
+                            </div>
                         </div>
                     </section>
 
@@ -156,6 +166,98 @@
                             </div>
                         </div>
                     </section>
+
+                    <section class="rounded-3xl bg-white p-5 text-black lg:col-span-2">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-black uppercase tracking-wider text-yellow-600">Another scoring example</p>
+                                <h3 class="text-3xl font-black">Yellow scores 1</h3>
+                                <p class="mt-2 text-sm font-bold text-zinc-600">Yellow has the closest stone, but Red’s nearest stone is second closest, so only one Yellow stone counts.</p>
+                            </div>
+                            <div class="rounded-2xl bg-yellow-400 px-4 py-2 text-sm font-black text-black">YELLOW +1</div>
+                        </div>
+
+                        <div class="relative mx-auto mt-6 aspect-square max-w-[380px] rounded-full border-[18px] border-blue-600 bg-white shadow-2xl">
+                            <div class="absolute inset-[14%] rounded-full border-[18px] border-white bg-red-600"></div>
+                            <div class="absolute inset-[31%] rounded-full border-[14px] border-white bg-blue-600"></div>
+                            <div class="absolute inset-[44%] rounded-full bg-white"></div>
+                            <div class="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black"></div>
+
+                            <div class="absolute left-[49%] top-[40%] flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-lg font-black text-black ring-4 ring-white">Y</div>
+                            <div class="absolute left-[40%] top-[47%] flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-lg font-black text-white ring-4 ring-white">R</div>
+                            <div class="absolute left-[61%] top-[53%] flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-lg font-black text-black ring-4 ring-white">Y</div>
+                            <div class="absolute left-[32%] top-[64%] flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-lg font-black text-white ring-4 ring-white">R</div>
+                        </div>
+
+                        <div class="mt-5 grid gap-3 md:grid-cols-3">
+                            <div class="rounded-2xl bg-zinc-100 p-4">
+                                <p class="font-black">Closest stone?</p>
+                                <p class="mt-1 text-sm text-zinc-600">Yellow is closest.</p>
+                            </div>
+                            <div class="rounded-2xl bg-zinc-100 p-4">
+                                <p class="font-black">How many count?</p>
+                                <p class="mt-1 text-sm text-zinc-600">Only one Yellow stone beats Red’s best.</p>
+                            </div>
+                            <div class="rounded-2xl bg-zinc-100 p-4">
+                                <p class="font-black">Score</p>
+                                <p class="mt-1 text-sm text-zinc-600">Yellow scores 1 point.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div id="playerSetupModal" class="pointer-events-none fixed inset-0 z-[75] flex items-center justify-center bg-black/85 px-6 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-3xl rounded-[2rem] border border-white/10 bg-zinc-950 p-6 shadow-2xl">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-black uppercase tracking-wider text-red-400">Player setup</p>
+                        <h2 class="mt-2 text-5xl font-black leading-none">Add players</h2>
+                        <p class="mt-2 text-zinc-400">Add one player at a time. Choose Auto, Red or Yellow.</p>
+                    </div>
+                    <button type="button" onclick="closePlayerSetupModal()" class="rounded-2xl bg-white px-5 py-3 font-black text-black hover:bg-zinc-200">
+                        Done
+                    </button>
+                </div>
+
+                <div class="mt-6 rounded-3xl border border-red-500/20 bg-gradient-to-br from-red-600/20 to-black p-5 text-center">
+                    <div id="lastPlayerAdded" class="mb-5 hidden rounded-3xl border border-green-500/30 bg-green-500/10 px-6 py-4 text-green-200">
+                        <p class="text-xs font-black uppercase tracking-wider">Player locked in</p>
+                        <p id="lastPlayerAddedName" class="mt-1 text-3xl font-black"></p>
+                    </div>
+
+                    <label class="block">
+                        <span class="mb-2 block text-lg font-black">Player name</span>
+                        <input id="playerNameInput" type="text" inputmode="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type name here" class="w-full rounded-3xl border border-white/10 bg-black px-6 py-5 text-center text-3xl font-black text-white placeholder:text-zinc-600">
+                    </label>
+
+                    <div class="mt-4 grid grid-cols-3 gap-2">
+                        <button id="addTeamAutoButton" type="button" onclick="selectAddTeam('auto')" class="rounded-2xl bg-white px-3 py-3 font-black text-black">
+                            Auto
+                        </button>
+                        <button id="addTeamOneButton" type="button" onclick="selectAddTeam('one')" class="rounded-2xl bg-white/10 px-3 py-3 font-black hover:bg-white/20">
+                            Red
+                        </button>
+                        <button id="addTeamTwoButton" type="button" onclick="selectAddTeam('two')" class="rounded-2xl bg-white/10 px-3 py-3 font-black hover:bg-white/20">
+                            Yellow
+                        </button>
+                    </div>
+
+                    <button id="realAddPlayerButton" type="button" onclick="addPlayer()" class="mt-4 w-full rounded-3xl bg-red-600 px-6 py-5 text-2xl font-black active:scale-[0.98] hover:bg-red-500">
+                        Add Player
+                    </button>
+
+                    <p id="nextPlayerPrompt" class="mt-4 text-lg font-bold text-zinc-400">Add the first player to begin.</p>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <button type="button" onclick="randomiseTeams()" class="rounded-2xl bg-yellow-400 px-5 py-4 font-black text-black hover:bg-yellow-300">
+                        Shuffle Teams
+                    </button>
+                    <button type="button" onclick="clearPlayers()" class="rounded-2xl border border-white/10 bg-white/10 px-5 py-4 font-black hover:bg-white/20">
+                        Reset Lobby
+                    </button>
                 </div>
             </div>
         </div>
@@ -176,8 +278,8 @@
             <section class="flex min-h-0 flex-1 items-center justify-center rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
                 <div>
                     <p class="text-sm font-bold uppercase tracking-wider text-red-400">{{ $resource->name }}</p>
-                    <h2 class="mt-3 text-5xl font-black">Waiting for staff</h2>
-                    <p class="mt-3 text-zinc-400">This lane will update automatically when staff launch the game.</p>
+                    <h2 class="mt-3 text-5xl font-black">Lane warming up...</h2>
+                    <p class="mt-3 text-zinc-400">Grab your team. Your game is about to begin.</p>
                     <p class="mt-6 inline-flex rounded-2xl bg-red-600 px-6 py-4 font-black">
                         Ready when you are
                     </p>
@@ -187,220 +289,220 @@
                 </div>
             </section>
         @elseif ($session->status === 'setup')
-            <section class="grid min-h-0 flex-1 gap-3 overflow-hidden lg:grid-cols-[1fr_340px]">
-                <form method="POST" action="{{ route('play.setup', $session) }}" class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-4 sm:p-5">
+            <section class="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+                <form method="POST" action="{{ route('play.setup', $session) }}" class="flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900 p-5 shadow-2xl">
                     @csrf
 
-                    <div class="mb-4 flex shrink-0 items-start justify-between gap-4">
+                    <div class="flex shrink-0 items-start justify-between gap-4">
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-red-400">Game lobby</p>
-                            <h2 class="text-4xl font-black leading-none">Add your players</h2>
-                            <p class="mt-1 text-sm text-zinc-400">One name at a time. Add, cheer, repeat.</p>
+                            <p class="text-xs font-black uppercase tracking-wider text-red-400">{{ $resource->name }}</p>
+                            <h2 class="mt-2 text-5xl font-black leading-none">Set up your teams</h2>
+                            <p class="mt-2 text-zinc-400">Add your players, save your teams, then get ready to play.</p>
                         </div>
-                        <div class="rounded-2xl bg-white/10 px-4 py-3 text-right">
+
+                        <div class="rounded-2xl bg-white/10 px-5 py-4 text-right">
                             <p class="text-xs font-black uppercase tracking-wider text-zinc-400">Players added</p>
-                            <p id="totalPlayerCount" class="text-3xl font-black">0</p>
+                            <p id="totalPlayerCount" class="text-4xl font-black">0</p>
                         </div>
                     </div>
 
-                    <div class="grid shrink-0 gap-3 md:grid-cols-2">
+                    <div class="mt-5 grid shrink-0 gap-3 md:grid-cols-2">
                         <label>
                             <span class="mb-1 block text-sm font-bold">Team Red name</span>
-                            <input id="teamOneName" name="team_one_name" value="Stone Cold Legends" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-base font-bold text-white" required>
+                            <input id="teamOneName" name="team_one_name" value="Stone Cold Legends" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-black text-white" required>
                         </label>
                         <label>
                             <span class="mb-1 block text-sm font-bold">Team Yellow name</span>
-                            <input id="teamTwoName" name="team_two_name" value="Curl Power" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-base font-bold text-white" required>
+                            <input id="teamTwoName" name="team_two_name" value="Curl Power" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-black text-white" required>
                         </label>
                     </div>
 
-                    <div class="mt-4 grid shrink-0 gap-2 md:grid-cols-3">
-                        <button type="button" onclick="generateTeamNames()" class="rounded-2xl bg-white px-4 py-3 font-black text-black hover:bg-zinc-200">
-                            Surprise Team Names
-                        </button>
-                        <button type="button" onclick="randomiseTeams()" class="rounded-2xl bg-yellow-400 px-4 py-3 font-black text-black hover:bg-yellow-300">
-                            Shuffle Teams
-                        </button>
-                        <button type="button" onclick="clearPlayers()" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 font-black hover:bg-white/20">
-                            Reset Lobby
-                        </button>
-                    </div>
-
-                    <div class="mt-4 grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_1fr]">
-                        <div class="flex min-h-0 flex-col rounded-[2rem] border border-red-500/20 bg-gradient-to-br from-red-600/20 to-black p-4 sm:p-5">
-                            <div class="flex shrink-0 items-center justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-black uppercase tracking-wider text-red-300">Step 1</p>
-                                    <h3 class="text-3xl font-black">Who is playing?</h3>
-                                </div>
-                                <div class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-zinc-300">Player setup</div>
+                    <div class="mt-5 grid min-h-0 flex-1 gap-4 overflow-hidden md:grid-cols-2">
+                        <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-red-500/30 bg-red-600/10 p-5">
+                            <div class="flex shrink-0 items-center justify-between">
+                                <h3 class="text-3xl font-black">Team Red</h3>
+                                <span id="teamOneCount" class="rounded-full bg-red-600 px-4 py-2 text-sm font-black">0</span>
                             </div>
-
-                            <div class="mt-6 flex flex-1 flex-col items-center justify-center text-center">
-                                <div id="lastPlayerAdded" class="mb-5 hidden rounded-3xl border border-green-500/30 bg-green-500/10 px-6 py-4 text-green-200">
-                                    <p class="text-xs font-black uppercase tracking-wider">Player locked in</p>
-                                    <p id="lastPlayerAddedName" class="mt-1 text-3xl font-black"></p>
-                                </div>
-
-                                <label class="w-full max-w-xl">
-                                    <span class="mb-2 block text-lg font-black">Enter player name</span>
-                                    <input id="playerNameInput" type="text" inputmode="text" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type name here" class="w-full rounded-3xl border border-white/10 bg-black px-6 py-5 text-center text-3xl font-black text-white placeholder:text-zinc-600">
-                                </label>
-
-                                <div class="mt-4 grid w-full max-w-xl grid-cols-3 gap-2">
-                                    <button id="addTeamAutoButton" type="button" onclick="selectAddTeam('auto')" class="rounded-2xl bg-white px-3 py-3 font-black text-black">
-                                        Auto
-                                    </button>
-                                    <button id="addTeamOneButton" type="button" onclick="selectAddTeam('one')" class="rounded-2xl bg-white/10 px-3 py-3 font-black hover:bg-white/20">
-                                        Red
-                                    </button>
-                                    <button id="addTeamTwoButton" type="button" onclick="selectAddTeam('two')" class="rounded-2xl bg-white/10 px-3 py-3 font-black hover:bg-white/20">
-                                        Yellow
-                                    </button>
-                                </div>
-
-                                <button id="realAddPlayerButton" type="button" onclick="addPlayer()" class="mt-4 w-full max-w-xl rounded-3xl bg-red-600 px-6 py-5 text-2xl font-black active:scale-[0.98] hover:bg-red-500">
-                                    Add Player
-                                </button>
-
-                                <p id="nextPlayerPrompt" class="mt-4 text-lg font-bold text-zinc-400">Add the first player to begin.</p>
-                            </div>
+                            <div id="teamOneCards" class="thin-scrollbar mt-4 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
                         </div>
 
-                        <div class="grid min-h-0 gap-4 overflow-hidden">
-                            <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-red-500/30 bg-red-600/10 p-4">
-                                <div class="flex shrink-0 items-center justify-between">
-                                    <h3 class="text-2xl font-black">Team Red</h3>
-                                    <span id="teamOneCount" class="rounded-full bg-red-600 px-3 py-1 text-sm font-black">0</span>
-                                </div>
-                                <div id="teamOneCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
+                        <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-5">
+                            <div class="flex shrink-0 items-center justify-between">
+                                <h3 class="text-3xl font-black text-yellow-200">Team Yellow</h3>
+                                <span id="teamTwoCount" class="rounded-full bg-yellow-400 px-4 py-2 text-sm font-black text-black">0</span>
                             </div>
-
-                            <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-4">
-                                <div class="flex shrink-0 items-center justify-between">
-                                    <h3 class="text-2xl font-black text-yellow-200">Team Yellow</h3>
-                                    <span id="teamTwoCount" class="rounded-full bg-yellow-400 px-3 py-1 text-sm font-black text-black">0</span>
-                                </div>
-                                <div id="teamTwoCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
-                            </div>
+                            <div id="teamTwoCards" class="thin-scrollbar mt-4 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
                         </div>
                     </div>
 
                     <div id="hiddenPlayers"></div>
 
-                    <button type="submit" class="mt-3 w-full shrink-0 rounded-3xl bg-red-600 px-6 py-4 text-2xl font-black active:scale-[0.98] hover:bg-red-500">
-                        Save Teams
-                    </button>
-                </form>
-
-                <aside class="grid min-h-0 gap-4 overflow-hidden">
-                    <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                        <p class="text-sm font-bold uppercase tracking-wider text-red-400">Game length</p>
-                        <p class="mt-2 text-5xl font-black">{{ $session->duration_minutes }} mins</p>
-                    </section>
-
-                    <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                        <h3 class="text-2xl font-black">Need the rules?</h3>
-                        <p class="mt-2 text-sm text-zinc-400">Open the quick guide without leaving the game screen.</p>
-                        <button type="button" onclick="openHowToPlayModal()" class="mt-4 inline-flex w-full justify-center rounded-2xl bg-white px-5 py-4 text-lg font-black text-black hover:bg-zinc-200">
-                            How to Play
+                    <div class="mt-5 grid shrink-0 gap-3 md:grid-cols-5">
+                        <button type="button" onclick="openPlayerSetupModal()" class="rounded-3xl bg-red-600 px-5 py-5 text-xl font-black hover:bg-red-500 md:col-span-2">
+                            Add Players
                         </button>
-                    </section>
-
-                    @if ($session->teams->count() >= 2)
-                        <form method="POST" action="{{ route('play.start', $session) }}" class="rounded-3xl border border-green-500/30 bg-green-500/10 p-5">
-                            @csrf
-                            <p class="text-sm font-bold uppercase tracking-wider text-green-300">Teams saved</p>
-                            <h3 class="mt-2 text-3xl font-black">Ready?</h3>
-                            <p class="mt-2 text-sm text-green-100/80">Press Start Game when everyone is ready.</p>
-                            <button type="submit" class="mt-4 w-full rounded-3xl bg-white px-6 py-5 text-2xl font-black text-black hover:bg-zinc-200">
-                                Start Game
-                            </button>
-                        </form>
-                    @else
-                        <section class="rounded-3xl border border-white/10 bg-white/5 p-5">
-                            <p class="text-sm font-bold uppercase tracking-wider text-zinc-400">Next step</p>
-                            <h3 class="mt-2 text-3xl font-black">Build the lobby</h3>
-                            <p class="mt-2 text-sm text-zinc-400">Add players one by one, then save the teams.</p>
-                        </section>
-                    @endif
-                </aside>
+                        <button type="button" onclick="generateTeamNames()" class="rounded-3xl bg-white px-5 py-5 text-xl font-black text-black hover:bg-zinc-200">
+                            Surprise Names
+                        </button>
+                        <button type="button" onclick="randomiseTeams()" class="rounded-3xl bg-yellow-400 px-5 py-5 text-xl font-black text-black hover:bg-yellow-300">
+                            Shuffle
+                        </button>
+                        <button type="submit" class="rounded-3xl bg-green-500 px-5 py-5 text-xl font-black text-black hover:bg-green-400">
+                            Save Teams
+                        </button>
+                    </div>
+                </form>
             </section>
-        @elseif ($session->status === 'playing')
+        @elseif (in_array($session->status, ['playing', 'paused'], true))
             @php
                 $teams = $session->teams;
                 $endsAt = optional($session->ends_at)->toIso8601String();
+                $teamsAreReady = $teams->count() >= 2;
+                $isPaused = $session->status === 'paused';
+                $pausedRemaining = (int) data_get($session->metadata, 'remaining_seconds_when_paused', 0);
             @endphp
 
             <section class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_380px]">
                 <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-5">
                     <div class="text-center">
                         <p class="text-xs font-bold uppercase tracking-wider text-red-400">Time left</p>
-                        <div id="countdown" data-ends-at="{{ $endsAt }}" class="mt-1 text-7xl font-black tracking-tight md:text-8xl">
+                        <div id="countdown" data-ends-at="{{ $endsAt }}" data-status="{{ $session->status }}" data-paused-remaining="{{ $pausedRemaining }}" class="mt-1 text-7xl font-black tracking-tight md:text-8xl">
                             --:--
                         </div>
+                        <p id="countdownMessage" class="mt-1 text-sm font-black uppercase tracking-wider text-zinc-500">
+                            {{ $isPaused ? 'Paused by staff.' : ($teamsAreReady ? 'Game on' : 'Add your players.') }}
+                        </p>
                     </div>
 
-                    <div class="mt-5 grid gap-4 md:grid-cols-2">
-                        @foreach ($teams as $team)
-                            <div class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600' : 'bg-yellow-400 text-black' }} p-5 text-center">
-                                <p class="text-xl font-black uppercase">{{ $team->name }}</p>
-                                <p class="mt-2 text-7xl font-black">{{ $team->total_score }}</p>
-                                <div class="mt-2 truncate text-sm font-bold opacity-80">
-                                    @foreach ($team->players as $player)
-                                        <span>{{ $player->name }}</span>@if (! $loop->last), @endif
-                                    @endforeach
+                    @if (! $teamsAreReady)
+                        <form method="POST" action="{{ route('play.setup', $session) }}" class="mt-5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-black/40 p-5">
+                            @csrf
+
+                            <div class="flex shrink-0 items-start justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-black uppercase tracking-wider text-yellow-300">Timer is running</p>
+                                    <h2 class="mt-2 text-4xl font-black leading-none">Add your players</h2>
+                                    <p class="mt-2 text-zinc-400">Add your players, save teams, then start scoring.</p>
+                                </div>
+
+                                <div class="rounded-2xl bg-white/10 px-5 py-4 text-right">
+                                    <p class="text-xs font-black uppercase tracking-wider text-zinc-400">Players added</p>
+                                    <p id="totalPlayerCount" class="text-4xl font-black">0</p>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
 
-                    <form id="scoreForm" method="POST" action="{{ route('play.score', $session) }}" class="mt-5 rounded-3xl bg-black/40 p-4">
-                        @csrf
-
-                        <input id="winningTeamInput" type="hidden" name="winning_team_id">
-                        <input id="pointsInput" type="hidden" name="points" value="0">
-
-                        <div class="flex items-end justify-between gap-4">
-                            <div>
-                                <h3 class="text-2xl font-black">Add score</h3>
-                                <p class="mt-1 text-sm text-zinc-400">Tap winner, tap points, save.</p>
+                            <div class="mt-5 grid shrink-0 gap-3 md:grid-cols-2">
+                                <label>
+                                    <span class="mb-1 block text-sm font-bold">Team Red name</span>
+                                    <input id="teamOneName" name="team_one_name" value="Stone Cold Legends" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-black text-white" required>
+                                </label>
+                                <label>
+                                    <span class="mb-1 block text-sm font-bold">Team Yellow name</span>
+                                    <input id="teamTwoName" name="team_two_name" value="Curl Power" class="w-full rounded-2xl border border-white/10 bg-black px-4 py-4 text-lg font-black text-white" required>
+                                </label>
                             </div>
-                            <p class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-zinc-300">Round {{ $session->rounds->count() + 1 }}</p>
-                        </div>
 
-                        <div class="mt-4 grid gap-3 md:grid-cols-2">
+                            <div class="mt-5 grid min-h-0 flex-1 gap-4 overflow-hidden md:grid-cols-2">
+                                <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-red-500/30 bg-red-600/10 p-4">
+                                    <div class="flex shrink-0 items-center justify-between">
+                                        <h3 class="text-2xl font-black">Team Red</h3>
+                                        <span id="teamOneCount" class="rounded-full bg-red-600 px-3 py-1 text-sm font-black">0</span>
+                                    </div>
+                                    <div id="teamOneCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
+                                </div>
+
+                                <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-4">
+                                    <div class="flex shrink-0 items-center justify-between">
+                                        <h3 class="text-2xl font-black text-yellow-200">Team Yellow</h3>
+                                        <span id="teamTwoCount" class="rounded-full bg-yellow-400 px-3 py-1 text-sm font-black text-black">0</span>
+                                    </div>
+                                    <div id="teamTwoCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
+                                </div>
+                            </div>
+
+                            <div id="hiddenPlayers"></div>
+
+                            <div class="mt-5 grid shrink-0 gap-3 md:grid-cols-4">
+                                <button type="button" onclick="openPlayerSetupModal()" class="rounded-3xl bg-red-600 px-5 py-5 text-xl font-black hover:bg-red-500 md:col-span-2">
+                                    Add Players
+                                </button>
+                                <button type="button" onclick="randomiseTeams()" class="rounded-3xl bg-yellow-400 px-5 py-5 text-xl font-black text-black hover:bg-yellow-300">
+                                    Shuffle
+                                </button>
+                                <button type="submit" class="rounded-3xl bg-green-500 px-5 py-5 text-xl font-black text-black hover:bg-green-400">
+                                    Save Teams
+                                </button>
+                            </div>
+                        </form>
+                    @else
+                        <div class="mt-5 grid gap-4 md:grid-cols-2">
                             @foreach ($teams as $team)
-                                <button
-                                    type="button"
-                                    data-team-button
-                                    data-team-id="{{ $team->id }}"
-                                    onclick="selectWinningTeam('{{ $team->id }}')"
-                                    class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black' }} px-5 py-5 text-xl font-black opacity-80 transition hover:opacity-100"
-                                >
-                                    {{ $team->name }} won
-                                </button>
+                                <div class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600' : 'bg-yellow-400 text-black' }} p-5 text-center">
+                                    <p class="text-xl font-black uppercase">{{ $team->name }}</p>
+                                    <p class="mt-2 text-7xl font-black">{{ $team->total_score }}</p>
+                                    <div class="mt-3 flex justify-center gap-2 overflow-hidden">
+                                        @foreach ($team->players->take(5) as $player)
+                                            <div class="avatar-chip flex h-9 w-9 items-center justify-center rounded-full text-sm font-black text-black" title="{{ $player->name }}">
+                                                {{ strtoupper(substr($player->name, 0, 1)) }}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-2 truncate text-xs font-bold opacity-80">
+                                        @foreach ($team->players as $player)
+                                            <span>{{ $player->name }}</span>@if (! $loop->last), @endif
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
 
-                        <div class="mt-3 grid grid-cols-5 gap-2">
-                            @foreach ([0,1,2,3,4] as $point)
-                                <button
-                                    type="button"
-                                    data-point-button
-                                    data-point="{{ $point }}"
-                                    onclick="selectPoints('{{ $point }}')"
-                                    class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-2xl font-black hover:bg-white/20"
-                                >
-                                    {{ $point }}
-                                </button>
-                            @endforeach
-                        </div>
+                        <form id="scoreForm" method="POST" action="{{ route('play.score', $session) }}" class="mt-5 rounded-3xl bg-black/40 p-4">
+                            @csrf
 
-                        <button class="mt-3 w-full rounded-2xl bg-red-600 px-5 py-3 text-xl font-black hover:bg-red-500">
-                            Save Round
-                        </button>
-                    </form>
+                            <input id="winningTeamInput" type="hidden" name="winning_team_id">
+                            <input id="pointsInput" type="hidden" name="points" value="0">
+
+                            <div class="flex items-end justify-between gap-4">
+                                <div>
+                                    <h3 class="text-2xl font-black">Add score</h3>
+                                    <p class="mt-1 text-sm text-zinc-400">Tap winner, tap points, save.</p>
+                                </div>
+                                <p class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-zinc-300">Round {{ $session->rounds->count() + 1 }}</p>
+                            </div>
+
+                            <div class="mt-4 grid gap-3 md:grid-cols-2">
+                                @foreach ($teams as $team)
+                                    <button
+                                        type="button"
+                                        data-team-button
+                                        data-team-id="{{ $team->id }}"
+                                        onclick="selectWinningTeam('{{ $team->id }}')"
+                                        class="rounded-3xl border border-white/10 {{ $team->colour === 'red' ? 'bg-red-600 text-white' : 'bg-yellow-400 text-black' }} px-5 py-5 text-xl font-black opacity-80 transition hover:opacity-100"
+                                    >
+                                        {{ $team->name }} won
+                                    </button>
+                                @endforeach
+                            </div>
+
+                            <div class="mt-3 grid grid-cols-5 gap-2">
+                                @foreach ([0,1,2,3,4] as $point)
+                                    <button
+                                        type="button"
+                                        data-point-button
+                                        data-point="{{ $point }}"
+                                        onclick="selectPoints('{{ $point }}')"
+                                        class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-2xl font-black hover:bg-white/20"
+                                    >
+                                        {{ $point }}
+                                    </button>
+                                @endforeach
+                            </div>
+
+                            <button class="mt-3 w-full rounded-2xl bg-red-600 px-5 py-3 text-xl font-black hover:bg-red-500">
+                                Save Round
+                            </button>
+                        </form>
+                    @endif
 
                     <form id="autoEndForm" method="POST" action="{{ route('staff.sessions.end', $session) }}" class="hidden">
                         @csrf
@@ -408,27 +510,38 @@
                 </div>
 
                 <aside class="min-h-0 space-y-4 overflow-hidden">
-                    <section class="max-h-[calc(100vh-220px)] overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5">
-                        <h3 class="text-2xl font-black">Rounds</h3>
-                        <div class="thin-scrollbar mt-3 max-h-[calc(100vh-330px)] space-y-2 overflow-y-auto pr-1">
-                            @forelse ($session->rounds->sortByDesc('round_number') as $round)
-                                <div class="rounded-2xl bg-black/40 p-3">
-                                    <p class="font-black">Round {{ $round->round_number }}</p>
-                                    <p class="text-sm text-zinc-300">{{ $round->winningTeam?->name ?? 'No score' }} scored {{ $round->points }}</p>
-                                    <p class="mt-1 text-xs text-zinc-400">{{ $round->commentary }}</p>
-                                </div>
-                            @empty
-                                <p class="text-zinc-400">No rounds scored yet.</p>
-                            @endforelse
-                        </div>
-                    </section>
+                    @if ($teamsAreReady)
+                        <section class="max-h-[calc(100vh-220px)] overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5">
+                            <h3 class="text-2xl font-black">Rounds</h3>
+                            <div class="thin-scrollbar mt-3 max-h-[calc(100vh-330px)] space-y-2 overflow-y-auto pr-1">
+                                @forelse ($session->rounds->sortByDesc('round_number') as $round)
+                                    <div class="rounded-2xl bg-black/40 p-3">
+                                        <p class="font-black">Round {{ $round->round_number }}</p>
+                                        <p class="text-sm text-zinc-300">{{ $round->winningTeam?->name ?? 'No score' }} scored {{ $round->points }}</p>
+                                        <p class="mt-1 text-xs text-zinc-400">{{ $round->commentary }}</p>
+                                    </div>
+                                @empty
+                                    <p class="text-zinc-400">No rounds scored yet.</p>
+                                @endforelse
+                            </div>
+                        </section>
 
-                    <form method="POST" action="{{ route('staff.sessions.end', $session) }}">
-                        @csrf
-                        <button class="w-full rounded-3xl bg-white px-6 py-4 text-2xl font-black text-black hover:bg-zinc-200">
-                            Finish Game
-                        </button>
-                    </form>
+                        <form method="POST" action="{{ route('staff.sessions.end', $session) }}">
+                            @csrf
+                            <button class="w-full rounded-3xl bg-white px-6 py-4 text-2xl font-black text-black hover:bg-zinc-200">
+                                Finish Game
+                            </button>
+                        </form>
+                    @else
+                        <section class="rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-5">
+                            <p class="text-sm font-black uppercase tracking-wider text-yellow-300">Names first</p>
+                            <h3 class="mt-2 text-3xl font-black">Timer is live</h3>
+                            <p class="mt-2 text-sm text-zinc-300">Add players and save teams. The scoring buttons will appear automatically after teams are saved.</p>
+                            <button type="button" onclick="openPlayerSetupModal()" class="mt-4 w-full rounded-3xl bg-white px-6 py-4 text-xl font-black text-black hover:bg-zinc-200">
+                                Add Players
+                            </button>
+                        </section>
+                    @endif
                 </aside>
             </section>
         @elseif ($session->status === 'finished')
@@ -563,6 +676,26 @@
             if (!modal) return;
             modal.classList.add('pointer-events-none', 'opacity-0');
             modal.classList.remove('opacity-100');
+        }
+
+        function openPlayerSetupModal() {
+            const modal = document.getElementById('playerSetupModal');
+            if (!modal) return;
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+
+            setTimeout(() => {
+                const input = document.getElementById('playerNameInput');
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function closePlayerSetupModal() {
+            const modal = document.getElementById('playerSetupModal');
+            if (!modal) return;
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.classList.remove('opacity-100');
+            renderLobbyPlayers();
         }
 
         async function enterFullscreenMode() {
@@ -850,6 +983,17 @@
             const el = document.getElementById('countdown');
             if (!el) return;
 
+            const status = el.dataset.status;
+            const pausedRemaining = parseInt(el.dataset.pausedRemaining || '0', 10);
+
+            if (status === 'paused') {
+                const minutes = Math.floor(pausedRemaining / 60).toString().padStart(2, '0');
+                const seconds = (pausedRemaining % 60).toString().padStart(2, '0');
+                el.textContent = `PAUSED ${minutes}:${seconds}`;
+                el.classList.add('text-yellow-300');
+                return;
+            }
+
             const endsAt = new Date(el.dataset.endsAt).getTime();
             const now = new Date().getTime();
             const diff = Math.max(0, Math.floor((endsAt - now) / 1000));
@@ -921,6 +1065,7 @@
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 closeHowToPlayModal();
+                closePlayerSetupModal();
             }
         });
 

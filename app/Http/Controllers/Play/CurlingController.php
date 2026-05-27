@@ -46,7 +46,7 @@ class CurlingController extends Controller
     public function startGame(Request $request, GameResource $resource): RedirectResponse
     {
         $validated = $request->validate([
-            'duration_minutes' => ['required', 'integer', 'in:30,60'],
+            'duration_minutes' => ['required', 'integer', 'in:30,60,90,120'],
         ]);
 
         GameSession::query()
@@ -78,8 +78,8 @@ class CurlingController extends Controller
         GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
-            ->route('play.tablet', $resource)
-            ->with('success', 'Game launched for ' . $resource->name . '.');
+            ->route('staff.dashboard')
+            ->with('success', $resource->name . ' lobby created. Customer screen will update automatically.');
     }
 
     public function tablet(GameResource $resource): View
@@ -141,17 +141,15 @@ class CurlingController extends Controller
             ]);
         }
 
+        GameSessionUpdated::dispatch($session->fresh());
+
         return redirect()
             ->route('play.tablet', $session->resource)
-            ->with('success', 'Teams saved. Start the timer when players are ready.');
+            ->with('success', 'Teams saved. Get ready to play.');
     }
 
     public function startTimer(GameSession $session): RedirectResponse
     {
-        if ($session->teams()->count() < 2) {
-            return back()->with('error', 'Add teams before starting the game.');
-        }
-
         $session->update([
             'status' => 'playing',
             'started_at' => now(),
@@ -161,8 +159,8 @@ class CurlingController extends Controller
         GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
-            ->route('play.tablet', $session->resource)
-            ->with('success', 'Timer started. Game on.');
+            ->route('staff.dashboard')
+            ->with('success', 'Game timer started. Customer screen will update automatically.');
     }
 
     public function saveScore(Request $request, GameSession $session): RedirectResponse
@@ -207,7 +205,7 @@ class CurlingController extends Controller
         GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
-            ->route('play.tablet', $session->resource)
+            ->route('staff.dashboard')
             ->with('success', 'Game ended. Results are ready.');
     }
 
@@ -219,6 +217,8 @@ class CurlingController extends Controller
             'status' => 'cancelled',
             'ended_at' => now(),
         ]);
+
+        GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
             ->route('staff.dashboard')
@@ -246,7 +246,7 @@ class CurlingController extends Controller
 
         GameSessionUpdated::dispatch($session->fresh());
 
-        return back()->with('success', 'Game paused.');
+        return redirect()->route('staff.dashboard')->with('success', 'Game paused.');
     }
 
     public function resumeGame(GameSession $session): RedirectResponse
@@ -268,13 +268,13 @@ class CurlingController extends Controller
 
         GameSessionUpdated::dispatch($session->fresh());
 
-        return back()->with('success', 'Game resumed.');
+        return redirect()->route('staff.dashboard')->with('success', 'Game resumed.');
     }
 
     public function addTime(Request $request, GameSession $session): RedirectResponse
     {
         $validated = $request->validate([
-            'minutes' => ['required', 'integer', 'in:10,30'],
+            'minutes' => ['required', 'integer', 'in:5,10,30,60,90,120'],
         ]);
 
         $minutes = (int) $validated['minutes'];
@@ -288,16 +288,20 @@ class CurlingController extends Controller
                 'metadata' => $metadata,
                 'duration_minutes' => $session->duration_minutes + $minutes,
             ]);
-        } else {
+        } elseif ($session->status === 'playing') {
             $session->update([
                 'ends_at' => $session->ends_at ? $session->ends_at->copy()->addMinutes($minutes) : now()->addMinutes($minutes),
+                'duration_minutes' => $session->duration_minutes + $minutes,
+            ]);
+        } else {
+            $session->update([
                 'duration_minutes' => $session->duration_minutes + $minutes,
             ]);
         }
 
         GameSessionUpdated::dispatch($session->fresh());
 
-        return back()->with('success', $minutes . ' minutes added.');
+        return redirect()->route('staff.dashboard')->with('success', $minutes . ' minutes added.');
     }
 
     public function sendEmails(Request $request, GameSession $session): RedirectResponse
