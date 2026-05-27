@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playard Curling | {{ $resource->name }}</title>
+    <meta name="lane-state" content="{{ $session ? $session->status . '-' . optional($session->updated_at)->timestamp : 'none' }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     @vite(['resources/js/app.js'])
@@ -74,7 +75,7 @@
                 <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-right">
                     <p class="text-xs font-black uppercase tracking-wider text-red-400">Lane screen</p>
                     <p class="text-lg font-black">Customer mode</p>
-                    <p id="connectionIndicator" class="mt-1 text-xs font-black text-green-400">● Live</p>
+                    <p id="connectionIndicator" class="mt-1 text-xs font-black text-yellow-400">● Connecting</p>
                 </div>
             </div>
         </header>
@@ -612,6 +613,9 @@
         let autoEndTriggered = false;
         let lobbyPlayers = [];
         let selectedAddTeam = 'auto';
+        const lobbyStorageKey = 'playard-lobby-' + @json($resource->id) + '-' + @json($session?->id ?? 'none');
+        const currentLaneState = document.querySelector('meta[name="lane-state"]')?.content || 'none';
+        let laneStatePollTimer = null;
 
         const premiumTeamNames = [
             'Stone Cold Legends',
@@ -630,6 +634,64 @@
 
         function resetSetupAutoResetTimer() {
             clearTimeout(setupResetTimer);
+        }
+
+        function saveLobbyToDevice() {
+            try {
+                localStorage.setItem(lobbyStorageKey, JSON.stringify(lobbyPlayers));
+            } catch (error) {
+                console.warn('Could not save lobby locally', error);
+            }
+        }
+
+        function restoreLobbyFromDevice() {
+            try {
+                const saved = localStorage.getItem(lobbyStorageKey);
+                if (!saved) return;
+
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    lobbyPlayers = parsed.filter(player => player && player.name && player.team);
+                }
+            } catch (error) {
+                console.warn('Could not restore lobby locally', error);
+            }
+        }
+
+        function clearSavedLobby() {
+            try {
+                localStorage.removeItem(lobbyStorageKey);
+            } catch (error) {
+                console.warn('Could not clear saved lobby', error);
+            }
+        }
+
+        function startLaneStatePolling() {
+            clearInterval(laneStatePollTimer);
+
+            laneStatePollTimer = setInterval(() => {
+                if (document.hidden) return;
+
+                fetch(window.location.href, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'X-Playard-Lane-Poll': '1',
+                    },
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        const match = html.match(/<meta name="lane-state" content="([^"]+)">/);
+                        const nextLaneState = match ? match[1] : null;
+
+                        if (nextLaneState && nextLaneState !== currentLaneState) {
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('Lane state polling failed', error);
+                    });
+            }, 2000);
         }
 
         function updateConnectionIndicator(isOnline) {
@@ -786,6 +848,7 @@
                 : selectedAddTeam;
 
             lobbyPlayers.push({ name, team });
+            saveLobbyToDevice();
 
             const lastPlayerAdded = document.getElementById('lastPlayerAdded');
             const lastPlayerAddedName = document.getElementById('lastPlayerAddedName');
@@ -813,12 +876,14 @@
         function removePlayer(index) {
             lobbyPlayers.splice(index, 1);
             resetSetupAutoResetTimer();
+            saveLobbyToDevice();
             renderLobbyPlayers();
         }
 
         function movePlayer(index, team) {
             lobbyPlayers[index].team = team;
             resetSetupAutoResetTimer();
+            saveLobbyToDevice();
             renderLobbyPlayers();
         }
 
@@ -831,6 +896,7 @@
                 }));
 
             resetSetupAutoResetTimer();
+            saveLobbyToDevice();
             renderLobbyPlayers();
         }
 
@@ -851,6 +917,7 @@
             }
 
             resetSetupAutoResetTimer();
+            clearSavedLobby();
             renderLobbyPlayers();
         }
 
@@ -1024,9 +1091,15 @@
                 return;
             }
 
-            updateConnectionIndicator(true);
-
             window.Echo.channel(`lane.${resourceId}`)
+                .subscribed(() => {
+                    console.log('Connected to lane updates:', resourceId);
+                    updateConnectionIndicator(true);
+                })
+                .error((error) => {
+                    console.warn('Lane realtime connection error:', error);
+                    updateConnectionIndicator(false);
+                })
                 .listen('.game.session.updated', (event) => {
                     console.log('Lane updated', event);
                     window.location.reload();
@@ -1035,7 +1108,7 @@
 
         window.addEventListener('online', () => {
             console.log('Tablet is online');
-            updateConnectionIndicator(true);
+            connectLaneRealtimeUpdates();
         });
 
         window.addEventListener('offline', () => {
@@ -1071,14 +1144,23 @@
 
             protectKioskNavigation();
             resetCursorTimer();
-            updateConnectionIndicator(navigator.onLine);
+            updateConnectionIndicator(false);
             selectAddTeam('auto');
+            restoreLobbyFromDevice();
             renderLobbyPlayers();
             selectPoints('0');
             updateCountdown();
             setInterval(updateCountdown, 1000);
             setTimeout(connectLaneRealtimeUpdates, 500);
+            startLaneStatePolling();
             requestWakeLock();
+
+            const setupForms = document.querySelectorAll('form[action="{{ $session ? route('play.setup', $session) : '#' }}"]');
+            setupForms.forEach((form) => {
+                form.addEventListener('submit', () => {
+                    clearSavedLobby();
+                });
+            });
 
             @if ($session && $session->status === 'finished')
                 launchWinnerConfetti();
