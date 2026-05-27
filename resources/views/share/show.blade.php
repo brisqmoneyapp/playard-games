@@ -225,7 +225,70 @@
             </button>
         </section>
 
+
         <p class="mt-4 text-center text-sm text-zinc-500">For Instagram, download the story or post image, then upload it and tag Playard.</p>
+
+        <section class="mt-8 rounded-[2rem] border border-green-500/30 bg-green-500/10 p-6 shadow-2xl">
+            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p class="text-sm font-black uppercase tracking-wider text-green-300">Send results</p>
+                    <h2 class="mt-2 text-3xl font-black">Email this scorecard</h2>
+                    <p class="mt-2 text-zinc-300">Add one or more email addresses and we’ll send the game result link.</p>
+                </div>
+                <div class="rounded-2xl bg-black/30 px-4 py-3 text-sm font-black text-green-200">
+                    {{ $session->resource->name }} result
+                </div>
+            </div>
+
+            @if (session('success'))
+                <div class="mt-5 rounded-2xl border border-green-400/30 bg-green-400/10 px-5 py-4 font-bold text-green-100">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mt-5 rounded-2xl border border-red-400/30 bg-red-400/10 px-5 py-4 font-bold text-red-100">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mt-5 rounded-2xl border border-red-400/30 bg-red-400/10 px-5 py-4 text-red-100">
+                    <p class="font-black">Please check the email fields.</p>
+                    <ul class="mt-2 list-inside list-disc text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('play.emails', $session) }}" class="mt-5 grid gap-4">
+                @csrf
+
+                <div id="emailFields" class="grid gap-3">
+                    <label class="block">
+                        <span class="mb-2 block text-sm font-black text-zinc-200">Email address</span>
+                        <input type="email" name="emails[]" placeholder="customer@example.com" class="w-full rounded-2xl border border-white/10 bg-black px-5 py-4 text-lg font-bold text-white placeholder:text-zinc-600" required>
+                    </label>
+                </div>
+
+                <button type="button" onclick="addEmailField()" class="rounded-2xl border border-white/10 bg-white/10 px-5 py-4 font-black hover:bg-white/20">
+                    Add another email
+                </button>
+
+                <label class="flex items-start gap-3 rounded-2xl bg-black/30 p-4 text-sm text-zinc-300">
+                    <input type="checkbox" name="marketing_consent" value="1" class="mt-1 h-5 w-5 rounded border-white/20 bg-black">
+                    <span>
+                        I agree Playard can send me game results and occasional offers or updates. I can unsubscribe at any time.
+                    </span>
+                </label>
+
+                <button type="submit" class="rounded-2xl bg-green-500 px-6 py-5 text-xl font-black text-black hover:bg-green-400">
+                    Send scorecard email
+                </button>
+            </form>
+        </section>
 
         <section class="mt-10 grid gap-8 lg:grid-cols-2">
             <div>
@@ -315,6 +378,24 @@
     </main>
 
     <script>
+        function addEmailField() {
+            const wrapper = document.getElementById('emailFields');
+            if (!wrapper) return;
+
+            const row = document.createElement('div');
+            row.className = 'grid gap-2 md:grid-cols-[1fr_auto]';
+            row.innerHTML = `
+                <input type="email" name="emails[]" placeholder="another@example.com" class="w-full rounded-2xl border border-white/10 bg-black px-5 py-4 text-lg font-bold text-white placeholder:text-zinc-600">
+                <button type="button" onclick="this.closest('div').remove()" class="rounded-2xl bg-red-600 px-5 py-4 font-black hover:bg-red-500">
+                    Remove
+                </button>
+            `;
+
+            wrapper.appendChild(row);
+            const input = row.querySelector('input');
+            if (input) input.focus();
+        }
+
         function copyShareLink() {
             navigator.clipboard.writeText(@json($shareUrl));
             alert('Scorecard link copied');

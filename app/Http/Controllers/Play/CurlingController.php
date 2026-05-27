@@ -308,13 +308,21 @@ class CurlingController extends Controller
     {
         $validated = $request->validate([
             'emails' => ['required', 'array', 'min:1'],
-            'emails.*' => ['required', 'email', 'max:255'],
+            'emails.*' => ['nullable', 'email', 'max:255'],
             'marketing_consent' => ['nullable', 'boolean'],
         ]);
 
         $session = $session->load(['resource', 'activity', 'teams.players', 'rounds.winningTeam']);
         $marketingConsent = (bool) ($validated['marketing_consent'] ?? false);
-        $emails = collect($validated['emails'])->map(fn ($email) => strtolower(trim($email)))->unique()->values();
+        $emails = collect($validated['emails'])
+            ->map(fn ($email) => strtolower(trim((string) $email)))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($emails->isEmpty()) {
+            return back()->with('error', 'Please enter at least one email address.');
+        }
 
         foreach ($emails as $email) {
             $customer = Customer::updateOrCreate(
@@ -352,9 +360,7 @@ class CurlingController extends Controller
             }
         }
 
-        return redirect()
-            ->route('play.tablet', $session->resource)
-            ->with('success', 'Scorecard links saved and emails processed.');
+        return back()->with('success', 'Scorecard emails processed.');
     }
 
     public function exportCustomersCsv()
