@@ -1029,18 +1029,7 @@
             window.Echo.channel(`lane.${resourceId}`)
                 .listen('.game.session.updated', (event) => {
                     console.log('Lane updated', event);
-
-                    const currentStatus = @json($session?->status);
-                    const nextStatus = event.status;
-
-                    if (currentStatus !== nextStatus) {
-                        window.location.reload();
-                        return;
-                    }
-
-                    if (['playing', 'paused', 'finished', 'setup'].includes(nextStatus)) {
-                        window.location.reload();
-                    }
+                    window.location.reload();
                 });
         }
 
