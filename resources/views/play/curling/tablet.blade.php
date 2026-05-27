@@ -698,7 +698,7 @@
             const indicator = document.getElementById('connectionIndicator');
             if (!indicator) return;
 
-            indicator.textContent = isOnline ? '● Live' : '● Offline';
+            indicator.textContent = isOnline ? '● Synced' : '● Syncing';
             indicator.classList.toggle('text-green-400', isOnline);
             indicator.classList.toggle('text-red-400', !isOnline);
         }
