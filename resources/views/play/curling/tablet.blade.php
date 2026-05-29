@@ -13,9 +13,11 @@
     <style>
         html,
         body {
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
+            min-height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior-y: contain;
+            touch-action: pan-y;
         }
 
         .cursor-hidden, .cursor-hidden * {
@@ -60,8 +62,8 @@
         }
     </style>
 </head>
-<body class="h-screen bg-zinc-950 text-white kiosk-body">
-    <main class="flex h-screen max-h-screen flex-col overflow-hidden px-5 py-4">
+<body class="min-h-screen bg-zinc-950 text-white kiosk-body">
+    <main class="flex min-h-screen flex-col overflow-x-hidden overflow-y-auto px-5 py-4">
         <header class="mb-4 flex shrink-0 flex-row items-center justify-between gap-4">
             <div>
                 <div class="inline-flex rounded-xl bg-red-600 px-4 py-2 text-2xl font-black tracking-tight">PLAYARD</div>
@@ -290,8 +292,8 @@
                 </div>
             </section>
         @elseif ($session->status === 'setup')
-            <section class="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-                <form method="POST" action="{{ route('play.setup', $session) }}" class="flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900 p-5 shadow-2xl">
+            <section class="flex min-h-0 flex-1 items-center justify-center overflow-visible">
+                <form method="POST" action="{{ route('play.setup', $session) }}" class="flex w-full max-w-6xl flex-col overflow-visible rounded-[2rem] border border-white/10 bg-zinc-900 p-5 shadow-2xl">
                     @csrf
 
                     <div class="flex shrink-0 items-start justify-between gap-4">
@@ -363,7 +365,7 @@
                 $pausedRemaining = (int) data_get($session->metadata, 'remaining_seconds_when_paused', 0);
             @endphp
 
-            <section class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_380px]">
+            <section class="grid min-h-0 flex-1 gap-4 overflow-visible lg:grid-cols-[1fr_380px]">
                 <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-5">
                     <div class="text-center">
                         <p class="text-xs font-bold uppercase tracking-wider text-red-400">Time left</p>
@@ -550,7 +552,7 @@
                 $teams = $session->teams->sortByDesc('total_score')->values();
             @endphp
 
-            <section class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[1fr_380px]">
+            <section class="grid min-h-0 flex-1 gap-4 overflow-visible lg:grid-cols-[1fr_380px]">
                 <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-6 text-center">
                     <p class="text-sm font-bold uppercase tracking-wider text-red-400">Final result</p>
                     <h2 class="mt-2 text-5xl font-black">{{ $session->winner_team_name }}</h2>
