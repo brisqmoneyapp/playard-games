@@ -205,7 +205,7 @@ class CurlingController extends Controller
         GameSessionUpdated::dispatch($session->fresh());
 
         return redirect()
-            ->route('staff.dashboard')
+            ->route('play.tablet', $session->resource)
             ->with('success', 'Game ended. Results are ready.');
     }
 
