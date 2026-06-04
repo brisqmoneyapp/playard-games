@@ -204,6 +204,14 @@ class CurlingController extends Controller
         $this->finishSession($session);
         GameSessionUpdated::dispatch($session->fresh());
 
+        $previousUrl = url()->previous();
+
+        if (str_contains($previousUrl, '/staff')) {
+            return redirect()
+                ->route('staff.dashboard')
+                ->with('success', 'Game ended. Results are ready.');
+        }
+
         return redirect()
             ->route('play.tablet', $session->resource)
             ->with('success', 'Game ended. Results are ready.');
