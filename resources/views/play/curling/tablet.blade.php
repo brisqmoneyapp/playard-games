@@ -13,11 +13,19 @@
     <style>
         html,
         body {
+            width: 100%;
             min-height: 100%;
+            height: auto;
             overflow-x: hidden;
             overflow-y: auto;
-            overscroll-behavior-y: contain;
+            overscroll-behavior-y: auto;
             touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .android-scroll-safe {
+            max-height: none !important;
+            overflow: visible !important;
         }
 
         .cursor-hidden, .cursor-hidden * {
@@ -63,7 +71,7 @@
     </style>
 </head>
 <body class="min-h-screen bg-zinc-950 text-white kiosk-body">
-    <main class="flex min-h-screen flex-col overflow-x-hidden overflow-y-auto px-5 py-4">
+    <main class="android-scroll-safe min-h-screen overflow-x-hidden overflow-y-auto px-5 py-4">
         <header class="mb-4 flex shrink-0 flex-row items-center justify-between gap-4">
             <div>
                 <div class="inline-flex rounded-xl bg-red-600 px-4 py-2 text-2xl font-black tracking-tight">PLAYARD</div>
@@ -320,8 +328,8 @@
                         </label>
                     </div>
 
-                    <div class="mt-5 grid min-h-0 flex-1 gap-4 overflow-hidden md:grid-cols-2">
-                        <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-red-500/30 bg-red-600/10 p-5">
+                    <div class="android-scroll-safe mt-5 grid gap-4 md:grid-cols-2">
+                        <div class="android-scroll-safe flex flex-col rounded-3xl border border-red-500/30 bg-red-600/10 p-5">
                             <div class="flex shrink-0 items-center justify-between">
                                 <h3 class="text-3xl font-black">Team Red</h3>
                                 <span id="teamOneCount" class="rounded-full bg-red-600 px-4 py-2 text-sm font-black">0</span>
@@ -329,7 +337,7 @@
                             <div id="teamOneCards" class="thin-scrollbar mt-4 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
                         </div>
 
-                        <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-5">
+                        <div class="android-scroll-safe flex flex-col rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-5">
                             <div class="flex shrink-0 items-center justify-between">
                                 <h3 class="text-3xl font-black text-yellow-200">Team Yellow</h3>
                                 <span id="teamTwoCount" class="rounded-full bg-yellow-400 px-4 py-2 text-sm font-black text-black">0</span>
@@ -366,7 +374,7 @@
             @endphp
 
             <section class="grid min-h-0 flex-1 gap-4 overflow-visible lg:grid-cols-[1fr_380px]">
-                <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-5">
+                <div class="android-scroll-safe rounded-3xl border border-white/10 bg-zinc-900 p-5">
                     <div class="text-center">
                         <p class="text-xs font-bold uppercase tracking-wider text-red-400">Time left</p>
                         <div id="countdown" data-ends-at="{{ $endsAt }}" data-status="{{ $session->status }}" data-paused-remaining="{{ $pausedRemaining }}" class="mt-1 text-7xl font-black tracking-tight md:text-8xl">
@@ -378,7 +386,7 @@
                     </div>
 
                     @if (! $teamsAreReady)
-                        <form method="POST" action="{{ route('play.setup', $session) }}" class="mt-5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-black/40 p-5">
+                        <form method="POST" action="{{ route('play.setup', $session) }}" class="android-scroll-safe mt-5 flex flex-col rounded-3xl border border-white/10 bg-black/40 p-5">
                             @csrf
 
                             <div class="flex shrink-0 items-start justify-between gap-4">
@@ -405,8 +413,8 @@
                                 </label>
                             </div>
 
-                            <div class="mt-5 grid min-h-0 flex-1 gap-4 overflow-hidden md:grid-cols-2">
-                                <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-red-500/30 bg-red-600/10 p-4">
+                            <div class="android-scroll-safe mt-5 grid gap-4 md:grid-cols-2">
+                                <div class="android-scroll-safe flex flex-col rounded-3xl border border-red-500/30 bg-red-600/10 p-4">
                                     <div class="flex shrink-0 items-center justify-between">
                                         <h3 class="text-2xl font-black">Team Red</h3>
                                         <span id="teamOneCount" class="rounded-full bg-red-600 px-3 py-1 text-sm font-black">0</span>
@@ -414,7 +422,7 @@
                                     <div id="teamOneCards" class="thin-scrollbar mt-3 flex min-h-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto pr-1"></div>
                                 </div>
 
-                                <div class="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-4">
+                                <div class="android-scroll-safe flex flex-col rounded-3xl border border-yellow-400/30 bg-yellow-400/10 p-4">
                                     <div class="flex shrink-0 items-center justify-between">
                                         <h3 class="text-2xl font-black text-yellow-200">Team Yellow</h3>
                                         <span id="teamTwoCount" class="rounded-full bg-yellow-400 px-3 py-1 text-sm font-black text-black">0</span>
@@ -512,11 +520,11 @@
                     </form>
                 </div>
 
-                <aside class="min-h-0 space-y-4 overflow-hidden">
+                <aside class="android-scroll-safe space-y-4">
                     @if ($teamsAreReady)
-                        <section class="max-h-[calc(100vh-220px)] overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5">
+                        <section class="android-scroll-safe rounded-3xl border border-white/10 bg-white/5 p-5">
                             <h3 class="text-2xl font-black">Rounds</h3>
-                            <div class="thin-scrollbar mt-3 max-h-[calc(100vh-330px)] space-y-2 overflow-y-auto pr-1">
+                            <div class="thin-scrollbar android-scroll-safe mt-3 space-y-2 pr-1">
                                 @forelse ($session->rounds->sortByDesc('round_number') as $round)
                                     <div class="rounded-2xl bg-black/40 p-3">
                                         <p class="font-black">Round {{ $round->round_number }}</p>
@@ -553,7 +561,7 @@
             @endphp
 
             <section class="grid min-h-0 flex-1 gap-4 overflow-visible lg:grid-cols-[1fr_380px]">
-                <div class="min-h-0 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 p-6 text-center">
+                <div class="android-scroll-safe rounded-3xl border border-white/10 bg-zinc-900 p-6 text-center">
                     <p class="text-sm font-bold uppercase tracking-wider text-red-400">Final result</p>
                     <h2 class="mt-2 text-5xl font-black">{{ $session->winner_team_name }}</h2>
                     <p class="mt-2 text-xl text-zinc-300">{{ $session->winner_team_name === 'Draw' ? 'It ended level. Rematch required.' : 'Stone cold winners.' }}</p>
@@ -577,7 +585,7 @@
                     </div>
                 </div>
 
-                <aside class="thin-scrollbar min-h-0 overflow-y-auto rounded-3xl border border-white/10 bg-white/5 p-5">
+                <aside class="thin-scrollbar android-scroll-safe rounded-3xl border border-white/10 bg-white/5 p-5">
                     <h3 class="text-2xl font-black">Send scorecard</h3>
                     <p class="mt-2 text-sm text-zinc-400">Add emails for everyone who wants the result.</p>
 
