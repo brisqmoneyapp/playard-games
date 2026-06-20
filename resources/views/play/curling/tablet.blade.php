@@ -515,7 +515,7 @@
                         </form>
                     @endif
 
-                    <form id="autoEndForm" method="POST" action="{{ route('staff.sessions.end', $session) }}" class="hidden">
+                    <form id="autoEndForm" method="POST" action="{{ route('play.end', $session) }}" class="hidden">
                         @csrf
                     </form>
                 </div>
@@ -537,7 +537,7 @@
                             </div>
                         </section>
 
-                        <form method="POST" action="{{ route('staff.sessions.end', $session) }}">
+                        <form method="POST" action="{{ route('play.end', $session) }}">
                             @csrf
                             <button class="w-full rounded-3xl bg-white px-6 py-4 text-2xl font-black text-black hover:bg-zinc-200">
                                 Finish Game

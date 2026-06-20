@@ -23,6 +23,7 @@ Route::get('/play/{resource:slug}', [CurlingController::class, 'tablet'])->name(
 Route::post('/play/{session}/setup', [CurlingController::class, 'saveSetup'])->name('play.setup');
 Route::post('/play/{session}/start', [CurlingController::class, 'startTimer'])->name('play.start');
 Route::post('/play/{session}/score', [CurlingController::class, 'saveScore'])->name('play.score');
+Route::post('/play/{session}/end', [CurlingController::class, 'endGame'])->name('play.end');
 Route::post('/play/{session}/emails', [CurlingController::class, 'sendEmails'])->name('play.emails');
 
 Route::get('/share/{session:share_code}', [ShareController::class, 'show'])->name('share.show');
